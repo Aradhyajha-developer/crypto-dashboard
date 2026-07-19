@@ -1,6 +1,12 @@
-import { fetchCoin, fetchHistory } from "./api.js";
+import { 
+  fetchCoin, 
+  fetchHistory,
+  searchCoins 
+} from "./api.js";
+
 
 import { renderChart } from "./chart.js";
+
 
 import {
   addFavorite,
@@ -9,9 +15,12 @@ import {
   isFavorite
 } from "./storage.js";
 
+
 import { fetchMarket } from "./market.js";
 
+
 import { convertUSD } from "./currency.js";
+
 
 import {
   showLoader,
@@ -20,7 +29,10 @@ import {
 
 
 
-window.addEventListener("DOMContentLoaded", () => {
+
+window.addEventListener(
+"DOMContentLoaded",
+()=>{
 
 
 const searchInput =
@@ -33,6 +45,10 @@ document.getElementById("searchBtn");
 
 const coinData =
 document.getElementById("coinData");
+
+
+const suggestions =
+document.getElementById("suggestions");
 
 
 const usdInput =
@@ -52,6 +68,9 @@ loadMarket();
 
 
 
+// SEARCH BUTTON
+
+
 searchBtn.addEventListener(
 "click",
 loadCoin
@@ -59,9 +78,15 @@ loadCoin
 
 
 
+
+
+// ENTER SEARCH
+
+
 searchInput.addEventListener(
 "keydown",
 (e)=>{
+
 
 if(e.key==="Enter"){
 
@@ -69,21 +94,153 @@ loadCoin();
 
 }
 
+
 });
 
 
 
 
 
+
+
+// SEARCH SUGGESTIONS
+
+
+searchInput.addEventListener(
+"input",
+async()=>{
+
+
+const value =
+searchInput.value.trim();
+
+
+
+if(value.length < 2){
+
+
+suggestions.innerHTML="";
+
+return;
+
+
+}
+
+
+
+try{
+
+
+const data =
+await searchCoins(value);
+
+
+
+suggestions.innerHTML =
+
+
+data.coins
+.slice(0,5)
+.map(
+coin=>`
+
+<div 
+class="suggestion"
+data-id="${coin.id}"
+>
+
+
+<img 
+src="${coin.thumb}"
+>
+
+
+<span>
+
+${coin.name}
+
+(${coin.symbol.toUpperCase()})
+
+</span>
+
+
+</div>
+
+
+`
+)
+.join("");
+
+
+
+
+
+
+document
+.querySelectorAll(".suggestion")
+.forEach(item=>{
+
+
+item.addEventListener(
+"click",
+()=>{
+
+
+searchInput.value =
+item.dataset.id;
+
+
+suggestions.innerHTML="";
+
+
+loadCoin();
+
+
+});
+
+
+});
+
+
+
+}
+
+catch(error){
+
+
+suggestions.innerHTML="";
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+
+
+// LOAD COIN FUNCTION
+
+
 async function loadCoin(){
 
 
+
 const coin =
-searchInput.value.trim().toLowerCase();
+searchInput.value
+.trim()
+.toLowerCase();
 
 
 
 if(!coin){
+
 
 coinData.innerHTML = `
 
@@ -97,9 +254,13 @@ Please enter coin name
 
 `;
 
+
 return;
 
+
 }
+
+
 
 
 
@@ -107,6 +268,7 @@ try{
 
 
 showLoader();
+
 
 
 const data =
@@ -118,7 +280,10 @@ hideLoader();
 
 
 
+
+
 coinData.innerHTML = `
+
 
 <div class="card">
 
@@ -129,14 +294,20 @@ alt="${data.name}"
 >
 
 
+
 <h2>
+
 ${data.name}
+
 (${data.symbol.toUpperCase()})
+
 </h2>
 
 
 
+
 <p>
+
 <strong>
 Price:
 </strong>
@@ -159,6 +330,7 @@ ${data.market_data.price_change_percentage_24h.toFixed(2)}%
 
 
 
+
 <p>
 
 <strong>
@@ -171,6 +343,7 @@ $${data.market_data.market_cap.usd.toLocaleString()}
 
 
 
+
 <button id="favoriteBtn">
 
 
@@ -180,6 +353,7 @@ isFavorite(data.id)
 "❤️ Saved"
 :
 "🤍 Add Favorite"
+
 }
 
 
@@ -189,7 +363,10 @@ isFavorite(data.id)
 
 </div>
 
+
 `;
+
+
 
 
 
@@ -211,7 +388,7 @@ addFavorite(data.id);
 renderFavorites();
 
 
-favoriteBtn.textContent =
+favoriteBtn.innerHTML =
 "❤️ Saved";
 
 
@@ -234,10 +411,13 @@ data.name
 
 
 
+
+
 }
 
 
 catch(error){
+
 
 
 hideLoader();
@@ -245,6 +425,7 @@ hideLoader();
 
 
 coinData.innerHTML = `
+
 
 <div class="error-card">
 
@@ -264,16 +445,22 @@ Enter valid cryptocurrency name
 
 `;
 
+
+
 }
 
 
 }
+
+
+
 
 
 
 
 
 // USD TO INR
+
 
 
 usdInput.addEventListener(
@@ -288,10 +475,13 @@ usdInput.value;
 
 if(!value){
 
+
 inrOutput.innerHTML =
 "₹0";
 
+
 return;
+
 
 }
 
@@ -306,11 +496,6 @@ inrOutput.innerHTML =
 `₹ ${inr.toFixed(2)}`;
 
 
-});
-
-
-
-
 
 });
 
@@ -318,7 +503,20 @@ inrOutput.innerHTML =
 
 
 
+});
 
+
+
+
+
+
+
+
+
+
+
+
+// FAVORITES
 
 
 function renderFavorites(){
@@ -334,6 +532,7 @@ getFavorites();
 
 
 
+
 if(!favorites.length){
 
 
@@ -343,11 +542,15 @@ list.innerHTML =
 
 return;
 
+
 }
 
 
 
+
 list.innerHTML =
+
+
 favorites.map(
 coin=>`
 
@@ -355,8 +558,11 @@ coin=>`
 
 
 <span>
+
 ${coin}
+
 </span>
+
 
 
 <button 
@@ -371,9 +577,11 @@ data-id="${coin}"
 
 </li>
 
-
 `
-).join("");
+)
+.join("");
+
+
 
 
 
@@ -400,8 +608,8 @@ renderFavorites();
 });
 
 
-
 });
+
 
 
 }
@@ -411,6 +619,10 @@ renderFavorites();
 
 
 
+
+
+
+// MARKET WIDGET
 
 
 async function loadMarket(){
@@ -425,7 +637,10 @@ await fetchMarket();
 
 
 
+
+
 const gainers =
+
 [...data]
 .sort(
 (a,b)=>
@@ -436,7 +651,11 @@ a.price_change_percentage_24h
 
 
 
+
+
+
 const losers =
+
 [...data]
 .sort(
 (a,b)=>
@@ -449,8 +668,12 @@ b.price_change_percentage_24h
 
 
 
-document.getElementById("gainers")
+
+
+document
+.getElementById("gainers")
 .innerHTML =
+
 
 gainers.map(
 coin=>`
@@ -464,15 +687,19 @@ ${coin.price_change_percentage_24h.toFixed(2)}%
 </p>
 
 `
-).join("");
+)
+.join("");
 
 
 
 
 
 
-document.getElementById("losers")
+
+document
+.getElementById("losers")
 .innerHTML =
+
 
 losers.map(
 coin=>`
@@ -486,26 +713,35 @@ ${coin.price_change_percentage_24h.toFixed(2)}%
 </p>
 
 `
-).join("");
+)
+.join("");
+
 
 
 
 }
+
+
 
 catch(error){
 
 
-document.getElementById("gainers")
+document
+.getElementById("gainers")
 .innerHTML =
 "Unable to load";
 
 
-document.getElementById("losers")
+
+document
+.getElementById("losers")
 .innerHTML =
 "Unable to load";
+
 
 
 }
+
 
 
 }
