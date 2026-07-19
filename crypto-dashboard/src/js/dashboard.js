@@ -1,4 +1,5 @@
 import { fetchCoin } from "./api.js";
+import { renderChart } from "./chart.js";
 
 window.addEventListener("DOMContentLoaded", () => {
 
@@ -37,6 +38,9 @@ coinData.innerHTML = "";
     try {
 
       const data = await fetchCoin(coin);
+      const history = await fetchHistory(coin);
+
+renderChart(history, data.name);
       spinner.innerHTML = "";
 
       coinData.innerHTML = `
