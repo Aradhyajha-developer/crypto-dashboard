@@ -1,31 +1,37 @@
 import { 
-  fetchCoin, 
-  fetchHistory,
-  searchCoins 
-} from "./api.js";
+fetchCoin,
+fetchHistory,
+searchCoins
+}
+from "./api.js";
 
 
-import { renderChart } from "./chart.js";
-
-
-import {
-  addFavorite,
-  removeFavorite,
-  getFavorites,
-  isFavorite
-} from "./storage.js";
-
-
-import { fetchMarket } from "./market.js";
-
-
-import { convertUSD } from "./currency.js";
+import { renderChart }
+from "./chart.js";
 
 
 import {
-  showLoader,
-  hideLoader
-} from "../components/Loader.js";
+addFavorite,
+removeFavorite,
+getFavorites,
+isFavorite
+}
+from "./storage.js";
+
+
+import { fetchMarket }
+from "./market.js";
+
+
+import { convertUSD }
+from "./currency.js";
+
+
+import {
+showLoader,
+hideLoader
+}
+from "../components/loader.js";
 
 
 
@@ -44,11 +50,7 @@ document.getElementById("searchBtn");
 
 
 const coinData =
-document.getElementById("coinData");
-
-
-const suggestions =
-document.getElementById("suggestions");
+document.getElementById("results");
 
 
 const usdInput =
@@ -59,6 +61,12 @@ const inrOutput =
 document.getElementById("inr");
 
 
+const suggestions =
+document.getElementById("suggestions");
+const spinner =
+document.getElementById("loader");
+
+
 
 renderFavorites();
 
@@ -67,26 +75,16 @@ loadMarket();
 
 
 
-
-// SEARCH BUTTON
-
-
-searchBtn.addEventListener(
+searchBtn?.addEventListener(
 "click",
 loadCoin
 );
 
 
 
-
-
-// ENTER SEARCH
-
-
-searchInput.addEventListener(
+searchInput?.addEventListener(
 "keydown",
 (e)=>{
-
 
 if(e.key==="Enter"){
 
@@ -94,19 +92,15 @@ loadCoin();
 
 }
 
-
 });
 
 
 
 
+// Search Suggestion
 
 
-
-// SEARCH SUGGESTIONS
-
-
-searchInput.addEventListener(
+searchInput?.addEventListener(
 "input",
 async()=>{
 
@@ -118,11 +112,9 @@ searchInput.value.trim();
 
 if(value.length < 2){
 
-
 suggestions.innerHTML="";
 
 return;
-
 
 }
 
@@ -138,7 +130,6 @@ await searchCoins(value);
 
 suggestions.innerHTML =
 
-
 data.coins
 .slice(0,5)
 .map(
@@ -146,33 +137,17 @@ coin=>`
 
 <div 
 class="suggestion"
-data-id="${coin.id}"
->
+data-id="${coin.id}">
 
-
-<img 
-src="${coin.thumb}"
->
-
-
-<span>
+<img src="${coin.thumb}">
 
 ${coin.name}
 
-(${coin.symbol.toUpperCase()})
-
-</span>
-
-
 </div>
-
 
 `
 )
 .join("");
-
-
-
 
 
 
@@ -181,10 +156,7 @@ document
 .forEach(item=>{
 
 
-item.addEventListener(
-"click",
-()=>{
-
+item.onclick=()=>{
 
 searchInput.value =
 item.dataset.id;
@@ -195,22 +167,18 @@ suggestions.innerHTML="";
 
 loadCoin();
 
+};
+
 
 });
-
-
-});
-
 
 
 }
 
-catch(error){
-
+catch{
 
 suggestions.innerHTML="";
 
-
 }
 
 
@@ -222,14 +190,7 @@ suggestions.innerHTML="";
 
 
 
-
-
-
-// LOAD COIN FUNCTION
-
-
 async function loadCoin(){
-
 
 
 const coin =
@@ -239,28 +200,7 @@ searchInput.value
 
 
 
-if(!coin){
-
-
-coinData.innerHTML = `
-
-<div class="error-card">
-
-<p>
-Please enter coin name
-</p>
-
-</div>
-
-`;
-
-
-return;
-
-
-}
-
-
+if(!coin)return;
 
 
 
@@ -280,8 +220,6 @@ hideLoader();
 
 
 
-
-
 coinData.innerHTML = `
 
 
@@ -290,9 +228,7 @@ coinData.innerHTML = `
 
 <img 
 src="${data.image.small}"
-alt="${data.name}"
 >
-
 
 
 <h2>
@@ -305,13 +241,9 @@ ${data.name}
 
 
 
-
 <p>
 
-<strong>
 Price:
-</strong>
-
 $${data.market_data.current_price.usd}
 
 </p>
@@ -320,32 +252,23 @@ $${data.market_data.current_price.usd}
 
 <p>
 
-<strong>
-24h Change:
-</strong>
-
+24h:
 ${data.market_data.price_change_percentage_24h.toFixed(2)}%
 
 </p>
 
 
 
-
 <p>
 
-<strong>
 Market Cap:
-</strong>
-
 $${data.market_data.market_cap.usd.toLocaleString()}
 
 </p>
 
 
 
-
 <button id="favoriteBtn">
-
 
 ${
 isFavorite(data.id)
@@ -356,9 +279,7 @@ isFavorite(data.id)
 
 }
 
-
 </button>
-
 
 
 </div>
@@ -368,18 +289,9 @@ isFavorite(data.id)
 
 
 
-
-
-
-
-const favoriteBtn =
-document.getElementById("favoriteBtn");
-
-
-
-favoriteBtn.addEventListener(
-"click",
-()=>{
+document
+.getElementById("favoriteBtn")
+.onclick=()=>{
 
 
 addFavorite(data.id);
@@ -388,14 +300,7 @@ addFavorite(data.id);
 renderFavorites();
 
 
-favoriteBtn.innerHTML =
-"❤️ Saved";
-
-
-});
-
-
-
+};
 
 
 
@@ -411,42 +316,28 @@ data.name
 
 
 
-
-
 }
 
 
-catch(error){
-
+catch{
 
 
 hideLoader();
 
 
 
-coinData.innerHTML = `
-
+coinData.innerHTML=`
 
 <div class="error-card">
-
 
 <h3>
 ❌ Coin Not Found
 </h3>
 
-
-<p>
-Enter valid cryptocurrency name
-</p>
-
-
 </div>
-
 
 `;
 
-
-
 }
 
 
@@ -458,9 +349,10 @@ Enter valid cryptocurrency name
 
 
 
+// USD INR
 
-// USD TO INR
 
+if(usdInput){
 
 
 usdInput.addEventListener(
@@ -472,16 +364,11 @@ const value =
 usdInput.value;
 
 
-
 if(!value){
 
-
-inrOutput.innerHTML =
-"₹0";
-
+inrOutput.innerHTML="₹0";
 
 return;
-
 
 }
 
@@ -496,6 +383,14 @@ inrOutput.innerHTML =
 `₹ ${inr.toFixed(2)}`;
 
 
+});
+
+}
+
+
+
+
+
 
 });
 
@@ -503,27 +398,17 @@ inrOutput.innerHTML =
 
 
 
-});
-
-
-
-
-
-
-
-
-
-
-
-
-// FAVORITES
 
 
 function renderFavorites(){
 
 
 const list =
-document.getElementById("favorites");
+document.getElementById("favList");
+
+
+
+if(!list)return;
 
 
 
@@ -532,43 +417,29 @@ getFavorites();
 
 
 
-
 if(!favorites.length){
-
 
 list.innerHTML =
 "<li>No favorites yet</li>";
 
-
 return;
-
 
 }
 
 
 
-
 list.innerHTML =
-
 
 favorites.map(
 coin=>`
 
 <li class="favorite-item">
 
-
-<span>
-
 ${coin}
-
-</span>
-
-
 
 <button 
 class="removeBtn"
-data-id="${coin}"
->
+data-id="${coin}">
 
 ❌
 
@@ -584,17 +455,12 @@ data-id="${coin}"
 
 
 
-
-
-
 document
 .querySelectorAll(".removeBtn")
 .forEach(btn=>{
 
 
-btn.addEventListener(
-"click",
-()=>{
+btn.onclick=()=>{
 
 
 removeFavorite(
@@ -605,11 +471,10 @@ btn.dataset.id
 renderFavorites();
 
 
-});
+};
 
 
 });
-
 
 
 }
@@ -620,13 +485,7 @@ renderFavorites();
 
 
 
-
-
-// MARKET WIDGET
-
-
 async function loadMarket(){
-
 
 
 try{
@@ -637,51 +496,22 @@ await fetchMarket();
 
 
 
+document.getElementById("gainers")
+.innerHTML =
 
-
-const gainers =
-
-[...data]
+data
 .sort(
 (a,b)=>
 b.price_change_percentage_24h -
 a.price_change_percentage_24h
 )
-.slice(0,5);
-
-
-
-
-
-
-const losers =
-
-[...data]
-.sort(
-(a,b)=>
-a.price_change_percentage_24h -
-b.price_change_percentage_24h
-)
-.slice(0,5);
-
-
-
-
-
-
-
-document
-.getElementById("gainers")
-.innerHTML =
-
-
-gainers.map(
+.slice(0,5)
+.map(
 coin=>`
 
 <p class="gain">
 
 🟢 ${coin.name}
-
 ${coin.price_change_percentage_24h.toFixed(2)}%
 
 </p>
@@ -692,22 +522,22 @@ ${coin.price_change_percentage_24h.toFixed(2)}%
 
 
 
-
-
-
-
-document
-.getElementById("losers")
+document.getElementById("losers")
 .innerHTML =
 
-
-losers.map(
+data
+.sort(
+(a,b)=>
+a.price_change_percentage_24h -
+b.price_change_percentage_24h
+)
+.slice(0,5)
+.map(
 coin=>`
 
 <p class="loss">
 
 🔴 ${coin.name}
-
 ${coin.price_change_percentage_24h.toFixed(2)}%
 
 </p>
@@ -718,30 +548,17 @@ ${coin.price_change_percentage_24h.toFixed(2)}%
 
 
 
-
 }
 
+catch{
 
 
-catch(error){
-
-
-document
-.getElementById("gainers")
-.innerHTML =
-"Unable to load";
-
-
-
-document
-.getElementById("losers")
-.innerHTML =
-"Unable to load";
-
+console.log(
+"Market loading failed"
+);
 
 
 }
-
 
 
 }
