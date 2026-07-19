@@ -1,146 +1,101 @@
-import { fetchCoin } from "./api.js";
+import { fetchCoin, fetchHistory } from "./api.js";
+
 import { renderChart } from "./chart.js";
+
 import {
   addFavorite,
   removeFavorite,
   getFavorites,
   isFavorite
 } from "./storage.js";
+
 import { fetchMarket } from "./market.js";
-import {convertUSD}
-from "./currency.js";
+
+import { convertUSD } from "./currency.js";
+
+import {
+  showLoader,
+  hideLoader
+} from "../components/Loader.js";
+
+
 
 window.addEventListener("DOMContentLoaded", () => {
 
-  const searchInput = document.getElementById("search");
-  const searchBtn = document.getElementById("searchBtn");
-  const coinData = document.getElementById("coinData");
-  const spinner = document.getElementById("spinner");
-  renderFavorites();
-  loadMarket();
 
-  searchBtn.addEventListener("click", loadCoin);
-  searchInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    loadCoin();
-  }
-});
+const searchInput =
+document.getElementById("search");
 
-  async function loadCoin() {
 
-    const coin = searchInput.value.trim().toLowerCase();
-    spinner.innerHTML = `
-  <div class="spinner" style="display:block;">
-    <div class="loader"></div>
-    <p>Loading...</p>
-  </div>
-`;
+const searchBtn =
+document.getElementById("searchBtn");
 
-coinData.innerHTML = "";
 
-    if (!coin) return;
-    if (!coin) {
-  coinData.innerHTML = `
-    <p style="color:red;">Please enter a coin name.</p>
-  `;
-  return;
-}
+const coinData =
+document.getElementById("coinData");
 
-    try {
 
-      const data = await fetchCoin(coin);
-      const history = await fetchHistory(coin);
+const usdInput =
+document.getElementById("usd");
 
-renderChart(history, data.name);
-      spinner.innerHTML = "";
 
-      coinData.innerHTML = `
-      const favoriteBtn = document.getElementById("favoriteBtn");
+const inrOutput =
+document.getElementById("inr");
 
-favoriteBtn.addEventListener("click", () => {
 
-  addFavorite(data.id);
 
-  renderFavorites();
+renderFavorites();
 
-  favoriteBtn.textContent = "❤️ Saved";
+loadMarket();
 
-});
-        <h2>${data.name}</h2>
-        <img src="${data.image.small}" alt="${data.name}">
-        <p><strong>Price:</strong> $${data.market_data.current_price.usd}</p>
-        <p><strong>24h Change:</strong> ${data.market_data.price_change_percentage_24h.toFixed(2)}%</p>
-        <p><strong>Market Cap:</strong> $${data.market_data.market_cap.usd.toLocaleString()}</p>
-        <button id="favoriteBtn">
-  ${isFavorite(data.id) ? "❤️ Saved" : "🤍 Add to Favorites"}
-</button>
-      `;
 
-    } catch (err) {
 
-    coinData.innerHTML = `
-  <div class="error-card">
-    <h3>❌ Coin Not Found</h3>
-    <p>Please enter a valid cryptocurrency name.</p>
-  </div>
-`;
-spinner.innerHTML = "";
 
-    }
 
-  }
+searchBtn.addEventListener(
+"click",
+loadCoin
+);
 
-});
-function renderFavorites() {
 
-  const list = document.getElementById("favorites");
 
-  const favorites = getFavorites();
+searchInput.addEventListener(
+"keydown",
+(e)=>{
 
-  if (!favorites.length) {
+if(e.key==="Enter"){
 
-    list.innerHTML = "<li>No favorites yet.</li>";
-
-    return;
-
-  }
-
-  list.innerHTML = favorites.map(coin => `
-    <li class="favorite-item">
-      <span>${coin}</span>
-      <button class="removeBtn" data-id="${coin}">
-        ❌
-      </button>
-    </li>
-  `).join("");
-
-  document.querySelectorAll(".removeBtn").forEach(btn => {
-
-    btn.addEventListener("click", () => {
-
-      removeFavorite(btn.dataset.id);
-
-      renderFavorites();
-
-    });
-
-  });
+loadCoin();
 
 }
-const usdInput = document.getElementById("usd");
+
+});
 
 
-usdInput.addEventListener(
-"input",
-async()=>{
 
 
-const value = usdInput.value;
+
+async function loadCoin(){
 
 
-if(!value) {
+const coin =
+searchInput.value.trim().toLowerCase();
 
-document.getElementById("inr").innerHTML = "₹0";
+
+
+if(!coin){
+
+coinData.innerHTML = `
+
+<div class="error-card">
+
+<p>
+Please enter coin name
+</p>
+
+</div>
+
+`;
 
 return;
 
@@ -148,51 +103,409 @@ return;
 
 
 
-const inr = await convertUSD(value);
+try{
+
+
+showLoader();
+
+
+const data =
+await fetchCoin(coin);
 
 
 
-document.getElementById("inr")
-.innerHTML =
+hideLoader();
+
+
+
+coinData.innerHTML = `
+
+<div class="card">
+
+
+<img 
+src="${data.image.small}"
+alt="${data.name}"
+>
+
+
+<h2>
+${data.name}
+(${data.symbol.toUpperCase()})
+</h2>
+
+
+
+<p>
+<strong>
+Price:
+</strong>
+
+$${data.market_data.current_price.usd}
+
+</p>
+
+
+
+<p>
+
+<strong>
+24h Change:
+</strong>
+
+${data.market_data.price_change_percentage_24h.toFixed(2)}%
+
+</p>
+
+
+
+<p>
+
+<strong>
+Market Cap:
+</strong>
+
+$${data.market_data.market_cap.usd.toLocaleString()}
+
+</p>
+
+
+
+<button id="favoriteBtn">
+
+
+${
+isFavorite(data.id)
+?
+"❤️ Saved"
+:
+"🤍 Add Favorite"
+}
+
+
+</button>
+
+
+
+</div>
+
+`;
+
+
+
+
+
+const favoriteBtn =
+document.getElementById("favoriteBtn");
+
+
+
+favoriteBtn.addEventListener(
+"click",
+()=>{
+
+
+addFavorite(data.id);
+
+
+renderFavorites();
+
+
+favoriteBtn.textContent =
+"❤️ Saved";
+
+
+});
+
+
+
+
+
+
+const history =
+await fetchHistory(coin);
+
+
+
+renderChart(
+history,
+data.name
+);
+
+
+
+}
+
+
+catch(error){
+
+
+hideLoader();
+
+
+
+coinData.innerHTML = `
+
+<div class="error-card">
+
+
+<h3>
+❌ Coin Not Found
+</h3>
+
+
+<p>
+Enter valid cryptocurrency name
+</p>
+
+
+</div>
+
+
+`;
+
+}
+
+
+}
+
+
+
+
+
+// USD TO INR
+
+
+usdInput.addEventListener(
+"input",
+async()=>{
+
+
+const value =
+usdInput.value;
+
+
+
+if(!value){
+
+inrOutput.innerHTML =
+"₹0";
+
+return;
+
+}
+
+
+
+const inr =
+await convertUSD(value);
+
+
+
+inrOutput.innerHTML =
 `₹ ${inr.toFixed(2)}`;
 
 
 });
-async function loadMarket() {
 
-  try {
 
-    const data = await fetchMarket();
 
-    const gainers = [...data]
-      .sort((a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h)
-      .slice(0, 5);
 
-    const losers = [...data]
-      .sort((a, b) => a.price_change_percentage_24h - b.price_change_percentage_24h)
-      .slice(0, 5);
 
-    document.getElementById("gainers").innerHTML = gainers
-      .map(
-        coin => `
-          <p>🟢 ${coin.name} (${coin.price_change_percentage_24h.toFixed(2)}%)</p>
-        `
-      )
-      .join("");
+});
 
-    document.getElementById("losers").innerHTML = losers
-      .map(
-        coin => `
-          <p>🔴 ${coin.name} (${coin.price_change_percentage_24h.toFixed(2)}%)</p>
-        `
-      )
-      .join("");
 
-  } catch (err) {
 
-    document.getElementById("gainers").innerHTML = "Unable to load";
-    document.getElementById("losers").innerHTML = "Unable to load";
 
-  }
+
+
+
+
+function renderFavorites(){
+
+
+const list =
+document.getElementById("favorites");
+
+
+
+const favorites =
+getFavorites();
+
+
+
+if(!favorites.length){
+
+
+list.innerHTML =
+"<li>No favorites yet</li>";
+
+
+return;
+
+}
+
+
+
+list.innerHTML =
+favorites.map(
+coin=>`
+
+<li class="favorite-item">
+
+
+<span>
+${coin}
+</span>
+
+
+<button 
+class="removeBtn"
+data-id="${coin}"
+>
+
+❌
+
+</button>
+
+
+</li>
+
+
+`
+).join("");
+
+
+
+
+
+document
+.querySelectorAll(".removeBtn")
+.forEach(btn=>{
+
+
+btn.addEventListener(
+"click",
+()=>{
+
+
+removeFavorite(
+btn.dataset.id
+);
+
+
+renderFavorites();
+
+
+});
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+async function loadMarket(){
+
+
+
+try{
+
+
+const data =
+await fetchMarket();
+
+
+
+const gainers =
+[...data]
+.sort(
+(a,b)=>
+b.price_change_percentage_24h -
+a.price_change_percentage_24h
+)
+.slice(0,5);
+
+
+
+const losers =
+[...data]
+.sort(
+(a,b)=>
+a.price_change_percentage_24h -
+b.price_change_percentage_24h
+)
+.slice(0,5);
+
+
+
+
+
+document.getElementById("gainers")
+.innerHTML =
+
+gainers.map(
+coin=>`
+
+<p class="gain">
+
+🟢 ${coin.name}
+
+${coin.price_change_percentage_24h.toFixed(2)}%
+
+</p>
+
+`
+).join("");
+
+
+
+
+
+
+document.getElementById("losers")
+.innerHTML =
+
+losers.map(
+coin=>`
+
+<p class="loss">
+
+🔴 ${coin.name}
+
+${coin.price_change_percentage_24h.toFixed(2)}%
+
+</p>
+
+`
+).join("");
+
+
+
+}
+
+catch(error){
+
+
+document.getElementById("gainers")
+.innerHTML =
+"Unable to load";
+
+
+document.getElementById("losers")
+.innerHTML =
+"Unable to load";
+
+
+}
+
 
 }
