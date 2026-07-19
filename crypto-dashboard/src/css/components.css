@@ -89,3 +89,27 @@ button:hover{
 .error-card h3{
     margin-bottom:10px;
 }
+/* ==========================
+   Favorites
+========================== */
+
+.favorite-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 0;
+    border-bottom:1px solid #e5e7eb;
+}
+
+.favorite-item button{
+    background:#ef4444;
+    border:none;
+    color:#fff;
+    padding:6px 10px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.favorite-item button:hover{
+    background:#dc2626;
+}

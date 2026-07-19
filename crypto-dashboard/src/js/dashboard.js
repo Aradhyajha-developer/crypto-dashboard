@@ -2,6 +2,7 @@ import { fetchCoin } from "./api.js";
 import { renderChart } from "./chart.js";
 import {
   addFavorite,
+  removeFavorite,
   getFavorites,
   isFavorite
 } from "./storage.js";
@@ -100,12 +101,25 @@ function renderFavorites() {
 
   }
 
-  list.innerHTML = favorites
-    .map(
-      coin => `
-        <li>${coin}</li>
-      `
-    )
-    .join("");
+  list.innerHTML = favorites.map(coin => `
+    <li class="favorite-item">
+      <span>${coin}</span>
+      <button class="removeBtn" data-id="${coin}">
+        ❌
+      </button>
+    </li>
+  `).join("");
+
+  document.querySelectorAll(".removeBtn").forEach(btn => {
+
+    btn.addEventListener("click", () => {
+
+      removeFavorite(btn.dataset.id);
+
+      renderFavorites();
+
+    });
+
+  });
 
 }
