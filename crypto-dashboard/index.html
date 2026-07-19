@@ -1,281 +1,101 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
 
-<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<meta charset="UTF-8">
+    <title>CryptoDash - Real Time Crypto Tracker</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+      name="description"
+      content="Track live cryptocurrency prices with charts and market analysis"
+    />
+  </head>
 
+  <body>
+    <div id="app">
+      <!-- Header -->
 
-<title>
-CryptoDash - Real Time Crypto Tracker
-</title>
+      <header class="header">
+        <h1>🚀 CryptoDash</h1>
 
+        <button id="themeBtn">🌙</button>
+      </header>
 
-<meta 
-name="description"
-content="Track live cryptocurrency prices with charts and market analysis"
-/>
+      <!-- Search Section -->
 
+      <section class="search-box">
+        <input
+          type="text"
+          id="search"
+          placeholder="Search Bitcoin, Ethereum..."
+        />
 
-</head>
+        <button id="searchBtn">Search</button>
+      </section>
 
+      <!-- Loader -->
 
-<body>
+      <div id="loader"></div>
 
+      <!-- Search Result -->
 
-<div id="app">
+      <section id="results"></section>
 
+      <!-- Dashboard Cards -->
 
-<!-- Header -->
+      <section class="grid">
+        <!-- Favorites -->
 
-<header class="header">
+        <div class="card">
+          <h2>⭐ My Favorites</h2>
 
+          <ul id="favList"></ul>
+        </div>
 
-<h1>
-🚀 CryptoDash
-</h1>
+        <!-- Top Gainers -->
 
+        <div class="card">
+          <h2>🔥 Top Gainers</h2>
 
-<button id="themeBtn">
-🌙
-</button>
+          <div id="gainers">Loading...</div>
+        </div>
 
+        <!-- Top Losers -->
 
-</header>
+        <div class="card">
+          <h2>📉 Top Losers</h2>
 
+          <div id="losers">Loading...</div>
+        </div>
+      </section>
 
+      <!-- Currency Converter -->
 
+      <section class="converter card">
+        <h2>💱 USD → INR Converter</h2>
 
-<!-- Search Section -->
+        <input id="usd" type="number" placeholder="Enter USD amount" />
 
+        <p id="inr">₹0</p>
+      </section>
 
-<section class="search-box">
+      <!-- Chart -->
 
+      <section class="chart-section card">
+        <h2>Price History</h2>
 
-<input
+        <canvas id="priceChart"> </canvas>
+      </section>
 
-type="text"
+      <!-- Footer -->
 
-id="search"
+      <footer>
+        <p>© 2026 CryptoDash | Real Time Market Tracker</p>
+      </footer>
+    </div>
 
-placeholder="Search Bitcoin, Ethereum..."
-
->
-
-
-
-<button id="searchBtn">
-
-Search
-
-</button>
-
-
-
-</section>
-
-
-
-
-<!-- Loader -->
-
-<div id="loader"></div>
-
-
-
-
-<!-- Search Result -->
-
-
-<section id="results">
-
-
-</section>
-
-
-
-
-
-<!-- Dashboard Cards -->
-
-
-<section class="grid">
-
-
-
-<!-- Favorites -->
-
-
-<div class="card">
-
-
-<h2>
-⭐ My Favorites
-</h2>
-
-
-<ul id="favList">
-
-</ul>
-
-
-</div>
-
-
-
-
-
-<!-- Top Gainers -->
-
-
-<div class="card">
-
-
-<h2>
-🔥 Top Gainers
-</h2>
-
-
-<div id="gainers">
-
-Loading...
-
-</div>
-
-
-</div>
-
-
-
-
-
-<!-- Top Losers -->
-
-
-<div class="card">
-
-
-<h2>
-📉 Top Losers
-</h2>
-
-
-<div id="losers">
-
-Loading...
-
-</div>
-
-
-</div>
-
-
-
-
-</section>
-
-
-
-
-
-
-
-<!-- Currency Converter -->
-
-
-<section class="converter card">
-
-
-<h2>
-💱 USD → INR Converter
-</h2>
-
-
-
-<input
-
-id="usd"
-
-type="number"
-
-placeholder="Enter USD amount"
-
->
-
-
-
-
-<p id="inr">
-
-₹0
-
-</p>
-
-
-
-</section>
-
-
-
-
-
-
-
-<!-- Chart -->
-
-
-<section class="chart-section card">
-
-
-<h2>
-
-Price History
-
-</h2>
-
-
-
-<canvas id="priceChart">
-
-</canvas>
-
-
-</section>
-
-
-
-
-
-
-<!-- Footer -->
-
-<footer>
-
-
-<p>
-
-© 2026 CryptoDash | Real Time Market Tracker
-
-</p>
-
-
-</footer>
-
-
-
-
-</div>
-
-
-
-
-
-<script type="module" src="/src/main.js"></script>
-
-
-</body>
-
-
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>
