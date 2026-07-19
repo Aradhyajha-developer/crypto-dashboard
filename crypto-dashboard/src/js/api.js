@@ -1,80 +1,43 @@
 const API = "https://api.coingecko.com/api/v3";
 
-
-// Fetch coin details
-
-export async function fetchCoin(id = "bitcoin") {
-
-
-  const res = await fetch(
-    `${API}/coins/${id}`
-  );
-
+async function request(url, errorMessage) {
+  const res = await fetch(url);
 
   if (!res.ok) {
-
-    throw new Error("Coin not found");
-
+    throw new Error(errorMessage);
   }
 
-
   return await res.json();
-
 }
 
-
-
-
-
-// Fetch 7 days price history
-
-export async function fetchHistory(id = "bitcoin") {
-
-
-  const res = await fetch(
-
-    `${API}/coins/${id}/market_chart?vs_currency=usd&days=7`
-
+// Search Coin
+export async function searchCoin(query) {
+  return request(
+    `${API}/search?query=${encodeURIComponent(query)}`,
+    "Unable to search coin."
   );
-
-
-  if (!res.ok) {
-
-    throw new Error("History not found");
-
-  }
-
-
-  return await res.json();
-
 }
 
-
-
-
-
-// Search coin suggestions
-
-export async function searchCoins(query) {
-
-
-  const res = await fetch(
-
-    `${API}/search?query=${query}`
-
+// Coin Details
+export async function fetchCoin(id) {
+  return request(
+    `${API}/coins/${id}`,
+    "Coin not found."
   );
+}
 
+// 7 Days Chart
+export async function fetchHistory(id) {
+  return request(
+    `${API}/coins/${id}/market_chart?vs_currency=usd&days=7`,
+    "History unavailable."
+  );
+}
 
-
-  if (!res.ok) {
-
-    throw new Error("Search failed");
-
-  }
-
-
-
-  return await res.json();
-
-
+// Market Data
+export async function fetchMarket() {
+  return request(
+    `${API}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false`,
+    "Market data unavailable."
+  );
 }

@@ -1,83 +1,229 @@
-.dashboard{
-
-    padding:50px 0;
-
-}
-
 .hero{
 
-    text-align:center;
+text-align:center;
 
-    margin-bottom:40px;
+padding:60px 20px;
+
+margin-bottom:30px;
 
 }
 
 .hero h1{
 
-    font-size:42px;
+font-size:48px;
 
-    margin-bottom:10px;
+font-weight:700;
+
+margin-bottom:10px;
+
+color:var(--primary);
+
 }
 
 .hero p{
 
-    color:#666;
+color:var(--text-light);
 
-    margin-bottom:30px;
+font-size:18px;
 
 }
 
+
+
 .search-box{
 
-    display:flex;
+display:flex;
 
-    justify-content:center;
+gap:15px;
 
-    gap:15px;
+margin-bottom:35px;
 
 }
 
 .search-box input{
 
-    width:350px;
+flex:1;
 
-    padding:15px;
+margin:0;
 
 }
 
 .search-box button{
 
-    padding:15px 30px;
+min-width:140px;
 
 }
 
-.dashboard-grid{
 
-    display:grid;
 
-    grid-template-columns:repeat(2,1fr);
+.stats .card{
 
-    gap:25px;
+text-align:center;
 
 }
-#priceChart{
-    width:100%;
-    height:320px;
-}
-#usd{
-    width:100%;
-    padding:12px;
-    margin:15px 0;
-    border:1px solid #d1d5db;
-    border-radius:8px;
+
+.stats h3{
+
+font-size:18px;
+
+margin-bottom:10px;
+
 }
 
-#convertBtn{
-    width:100%;
-    margin-bottom:15px;
+.stats p{
+
+font-size:28px;
+
+font-weight:700;
+
 }
 
-#inrResult{
-    text-align:center;
-    color:#2563eb;
+
+
+.chart{
+
+margin-top:35px;
+
+}
+
+
+
+.converter{
+
+margin-top:35px;
+
+text-align:center;
+
+}
+
+.converter input{
+
+max-width:320px;
+
+margin:20px auto;
+
+display:block;
+
+}
+
+#converted{
+
+margin-top:15px;
+
+font-size:24px;
+
+font-weight:bold;
+
+color:var(--success);
+
+}
+
+
+
+#results{
+
+margin-top:20px;
+
+}
+
+
+
+.coin-card h2{
+
+margin:15px 0;
+
+}
+
+.coin-card h3{
+
+font-size:30px;
+
+color:var(--primary);
+
+margin:15px 0;
+
+}
+
+.coin-card p{
+
+margin:8px 0;
+
+}
+
+
+
+.market-item:last-child{
+
+border-bottom:none;
+
+}
+
+
+
+.favorite-item:last-child{
+
+border-bottom:none;
+
+}
+
+
+
+.card{
+
+animation:fadeUp .4s ease;
+
+}
+
+
+
+@keyframes fadeUp{
+
+from{
+
+opacity:0;
+
+transform:translateY(20px);
+
+}
+
+to{
+
+opacity:1;
+
+transform:translateY(0);
+
+}
+
+}
+
+
+
+body.dark .card{
+
+background:#1e293b;
+
+}
+
+
+
+body.dark .header{
+
+background:#1e293b;
+
+}
+
+
+
+body.dark .footer{
+
+background:#1e293b;
+
+}
+
+
+
+body.dark button{
+
+background:#3b82f6;
+
 }

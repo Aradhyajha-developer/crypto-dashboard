@@ -1,25 +1,61 @@
-const KEY = "crypto-favorites";
+const KEY = "favorites";
 
 export function getFavorites() {
-  return JSON.parse(localStorage.getItem(KEY)) || [];
+
+  return JSON.parse(
+
+    localStorage.getItem(KEY)
+
+  ) || [];
+
 }
 
-export function addFavorite(coin) {
+export function saveFavorite(id) {
+
   const favorites = getFavorites();
 
-  if (!favorites.includes(coin)) {
-    favorites.push(coin);
+  if (!favorites.includes(id)) {
+
+    favorites.push(id);
+
+    localStorage.setItem(
+
+      KEY,
+
+      JSON.stringify(favorites)
+
+    );
+
   }
 
-  localStorage.setItem(KEY, JSON.stringify(favorites));
 }
 
-export function removeFavorite(coin) {
-  const favorites = getFavorites().filter(item => item !== coin);
+export function removeFavorite(id) {
 
-  localStorage.setItem(KEY, JSON.stringify(favorites));
+  const updated = getFavorites().filter(
+
+    coin => coin !== id
+
+  );
+
+  localStorage.setItem(
+
+    KEY,
+
+    JSON.stringify(updated)
+
+  );
+
 }
 
-export function isFavorite(coin) {
-  return getFavorites().includes(coin);
+export function isFavorite(id) {
+
+  return getFavorites().includes(id);
+
+}
+
+export function clearFavorites() {
+
+  localStorage.removeItem(KEY);
+
 }

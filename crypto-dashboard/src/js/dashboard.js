@@ -1,564 +1,162 @@
-import { 
-fetchCoin,
-fetchHistory,
-searchCoins
-}
-from "./api.js";
-
-
-import { renderChart }
-from "./chart.js";
-
+import {
+  searchCoin,
+  fetchCoin,
+  fetchHistory
+} from "./api.js";
 
 import {
-addFavorite,
-removeFavorite,
-getFavorites,
-isFavorite
-}
-from "./storage.js";
-
-
-import { fetchMarket }
-from "./market.js";
-
-
-import { convertUSD }
-from "./currency.js";
-
+  saveFavorite,
+  getFavorites,
+  removeFavorite
+} from "./storage.js";
 
 import {
-showLoader,
-hideLoader
+  createChart
+} from "./chart.js";
+
+const search = document.getElementById("search");
+const results = document.getElementById("results");
+const favList = document.getElementById("favList");
+
+search?.addEventListener("keypress", async (e) => {
+
+  if (e.key !== "Enter") return;
+
+  const value = search.value.trim().toLowerCase();
+
+  if (!value) {
+    results.innerHTML = `
+      <p class="error">Please enter a coin name.</p>
+    `;
+    return;
+  }
+
+  results.innerHTML = `<p>Loading...</p>`;
+
+  try {
+
+    const searchData = await searchCoin(value);
+
+    if (!searchData.coins.length) {
+      throw new Error("Coin not found");
+    }
+
+    const coin = searchData.coins[0];
+
+    const data = await fetchCoin(coin.id);
+
+    showCoin(data);
+
+    const history = await fetchHistory(coin.id);
+
+    createChart(history);
+
+  } catch (err) {
+
+    results.innerHTML = `
+      <p class="error">
+        Coin not found.
+      </p>
+    `;
+
+    console.error(err);
+
+  }
+
+});
+
+function showCoin(data) {
+
+  results.innerHTML = `
+
+    <div class="coin-card">
+
+      <img src="${data.image.small}" alt="${data.name}">
+
+      <h2>
+        ${data.name}
+        (${data.symbol.toUpperCase()})
+      </h2>
+
+      <h3>
+        $${data.market_data.current_price.usd.toLocaleString()}
+      </h3>
+
+      <p>
+        Market Cap:
+        $${data.market_data.market_cap.usd.toLocaleString()}
+      </p>
+
+      <p>
+        24h Change:
+        ${data.market_data.price_change_percentage_24h.toFixed(2)}%
+      </p>
+
+      <button id="favoriteBtn">
+        ⭐ Add Favorite
+      </button>
+
+    </div>
+
+  `;
+
+  document
+    .getElementById("favoriteBtn")
+    .addEventListener("click", () => {
+
+      saveFavorite(data.id);
+
+      renderFavorites();
+
+    });
+
 }
-from "../components/loader.js";
 
+function renderFavorites() {
 
+  const favorites = getFavorites();
 
+  if (!favorites.length) {
 
-window.addEventListener(
-"DOMContentLoaded",
-()=>{
+    favList.innerHTML = `
+      <li>No favorites added.</li>
+    `;
 
+    return;
 
-const searchInput =
-document.getElementById("search");
+  }
 
+  favList.innerHTML = favorites.map((coin) => `
 
-const searchBtn =
-document.getElementById("searchBtn");
+      <li class="favorite-item">
 
+        <span>${coin}</span>
 
-const coinData =
-document.getElementById("results");
+        <button
+          class="remove-btn"
+          data-id="${coin}"
+        >
+          ❌
+        </button>
 
+      </li>
 
-const usdInput =
-document.getElementById("usd");
+  `).join("");
 
+  document
+    .querySelectorAll(".remove-btn")
+    .forEach(btn => {
 
-const inrOutput =
-document.getElementById("inr");
+      btn.addEventListener("click", () => {
 
+        removeFavorite(btn.dataset.id);
 
-const suggestions =
-document.getElementById("suggestions");
-const spinner =
-document.getElementById("loader");
+        renderFavorites();
 
+      });
 
+    });
+
+}
 
 renderFavorites();
-
-loadMarket();
-
-
-
-
-searchBtn?.addEventListener(
-"click",
-loadCoin
-);
-
-
-
-searchInput?.addEventListener(
-"keydown",
-(e)=>{
-
-if(e.key==="Enter"){
-
-loadCoin();
-
-}
-
-});
-
-
-
-
-// Search Suggestion
-
-
-searchInput?.addEventListener(
-"input",
-async()=>{
-
-
-const value =
-searchInput.value.trim();
-
-
-
-if(value.length < 2){
-
-suggestions.innerHTML="";
-
-return;
-
-}
-
-
-
-try{
-
-
-const data =
-await searchCoins(value);
-
-
-
-suggestions.innerHTML =
-
-data.coins
-.slice(0,5)
-.map(
-coin=>`
-
-<div 
-class="suggestion"
-data-id="${coin.id}">
-
-<img src="${coin.thumb}">
-
-${coin.name}
-
-</div>
-
-`
-)
-.join("");
-
-
-
-document
-.querySelectorAll(".suggestion")
-.forEach(item=>{
-
-
-item.onclick=()=>{
-
-searchInput.value =
-item.dataset.id;
-
-
-suggestions.innerHTML="";
-
-
-loadCoin();
-
-};
-
-
-});
-
-
-}
-
-catch{
-
-suggestions.innerHTML="";
-
-}
-
-
-
-});
-
-
-
-
-
-
-async function loadCoin(){
-
-
-const coin =
-searchInput.value
-.trim()
-.toLowerCase();
-
-
-
-if(!coin)return;
-
-
-
-try{
-
-
-showLoader();
-
-
-
-const data =
-await fetchCoin(coin);
-
-
-
-hideLoader();
-
-
-
-coinData.innerHTML = `
-
-
-<div class="card">
-
-
-<img 
-src="${data.image.small}"
->
-
-
-<h2>
-
-${data.name}
-
-(${data.symbol.toUpperCase()})
-
-</h2>
-
-
-
-<p>
-
-Price:
-$${data.market_data.current_price.usd}
-
-</p>
-
-
-
-<p>
-
-24h:
-${data.market_data.price_change_percentage_24h.toFixed(2)}%
-
-</p>
-
-
-
-<p>
-
-Market Cap:
-$${data.market_data.market_cap.usd.toLocaleString()}
-
-</p>
-
-
-
-<button id="favoriteBtn">
-
-${
-isFavorite(data.id)
-?
-"❤️ Saved"
-:
-"🤍 Add Favorite"
-
-}
-
-</button>
-
-
-</div>
-
-
-`;
-
-
-
-document
-.getElementById("favoriteBtn")
-.onclick=()=>{
-
-
-addFavorite(data.id);
-
-
-renderFavorites();
-
-
-};
-
-
-
-const history =
-await fetchHistory(coin);
-
-
-
-renderChart(
-history,
-data.name
-);
-
-
-
-}
-
-
-catch{
-
-
-hideLoader();
-
-
-
-coinData.innerHTML=`
-
-<div class="error-card">
-
-<h3>
-❌ Coin Not Found
-</h3>
-
-</div>
-
-`;
-
-}
-
-
-}
-
-
-
-
-
-
-
-// USD INR
-
-
-if(usdInput){
-
-
-usdInput.addEventListener(
-"input",
-async()=>{
-
-
-const value =
-usdInput.value;
-
-
-if(!value){
-
-inrOutput.innerHTML="₹0";
-
-return;
-
-}
-
-
-
-const inr =
-await convertUSD(value);
-
-
-
-inrOutput.innerHTML =
-`₹ ${inr.toFixed(2)}`;
-
-
-});
-
-}
-
-
-
-
-
-
-});
-
-
-
-
-
-
-
-function renderFavorites(){
-
-
-const list =
-document.getElementById("favList");
-
-
-
-if(!list)return;
-
-
-
-const favorites =
-getFavorites();
-
-
-
-if(!favorites.length){
-
-list.innerHTML =
-"<li>No favorites yet</li>";
-
-return;
-
-}
-
-
-
-list.innerHTML =
-
-favorites.map(
-coin=>`
-
-<li class="favorite-item">
-
-${coin}
-
-<button 
-class="removeBtn"
-data-id="${coin}">
-
-❌
-
-</button>
-
-
-</li>
-
-`
-)
-.join("");
-
-
-
-
-document
-.querySelectorAll(".removeBtn")
-.forEach(btn=>{
-
-
-btn.onclick=()=>{
-
-
-removeFavorite(
-btn.dataset.id
-);
-
-
-renderFavorites();
-
-
-};
-
-
-});
-
-
-}
-
-
-
-
-
-
-
-async function loadMarket(){
-
-
-try{
-
-
-const data =
-await fetchMarket();
-
-
-
-document.getElementById("gainers")
-.innerHTML =
-
-data
-.sort(
-(a,b)=>
-b.price_change_percentage_24h -
-a.price_change_percentage_24h
-)
-.slice(0,5)
-.map(
-coin=>`
-
-<p class="gain">
-
-🟢 ${coin.name}
-${coin.price_change_percentage_24h.toFixed(2)}%
-
-</p>
-
-`
-)
-.join("");
-
-
-
-document.getElementById("losers")
-.innerHTML =
-
-data
-.sort(
-(a,b)=>
-a.price_change_percentage_24h -
-b.price_change_percentage_24h
-)
-.slice(0,5)
-.map(
-coin=>`
-
-<p class="loss">
-
-🔴 ${coin.name}
-${coin.price_change_percentage_24h.toFixed(2)}%
-
-</p>
-
-`
-)
-.join("");
-
-
-
-}
-
-catch{
-
-
-console.log(
-"Market loading failed"
-);
-
-
-}
-
-
-}

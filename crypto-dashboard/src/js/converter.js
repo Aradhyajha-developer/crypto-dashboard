@@ -1,26 +1,44 @@
-window.addEventListener("DOMContentLoaded", () => {
+import { usdToInr } from "./currency.js";
 
-  const usdInput = document.getElementById("usd");
-  const convertBtn = document.getElementById("convertBtn");
-  const result = document.getElementById("inrResult");
+const amount = document.getElementById("amount");
+const btn = document.getElementById("convertBtn");
+const output = document.getElementById("converted");
 
-  if (!usdInput || !convertBtn || !result) return;
+btn?.addEventListener("click", async () => {
 
-  const RATE = 87; // Static rate for now
+  const value = Number(amount.value);
 
-  convertBtn.addEventListener("click", () => {
+  if (!value || value <= 0) {
 
-    const usd = Number(usdInput.value);
+    output.textContent = "Enter a valid USD amount.";
+    return;
 
-    if (isNaN(usd) || usd <= 0) {
-      result.textContent = "Enter a valid amount";
-      return;
-    }
+  }
 
-    const inr = usd * RATE;
+  output.textContent = "Converting...";
 
-    result.textContent = `₹ ${inr.toLocaleString("en-IN")}`;
+  try {
 
-  });
+    const result = await usdToInr(value);
+
+    output.innerHTML = `
+
+      <strong>
+
+      ₹ ${result.toLocaleString(undefined, {
+        maximumFractionDigits: 2
+      })}
+
+      </strong>
+
+    `;
+
+  } catch (err) {
+
+    output.textContent = "Conversion failed.";
+
+    console.error(err);
+
+  }
 
 });

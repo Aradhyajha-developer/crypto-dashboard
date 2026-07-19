@@ -1,13 +1,68 @@
-const API = "https://api.coingecko.com/api/v3";
+import { fetchMarket } from "./api.js";
 
-export async function fetchMarket() {
-  const res = await fetch(
-    `${API}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=20&page=1`
-  );
+const gainers = document.getElementById("gainers");
+const losers = document.getElementById("losers");
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch market data");
+export async function loadMarket() {
+
+  if (!gainers || !losers) return;
+
+  gainers.innerHTML = "Loading...";
+  losers.innerHTML = "Loading...";
+
+  try {
+
+    const coins = await fetchMarket();
+
+    const sorted = [...coins].sort(
+      (a, b) =>
+        b.price_change_percentage_24h -
+        a.price_change_percentage_24h
+    );
+
+    const topGainers = sorted.slice(0, 5);
+
+    const topLosers = [...sorted]
+      .reverse()
+      .slice(0, 5);
+
+    gainers.innerHTML = topGainers.map(coin => `
+
+      <div class="market-item">
+
+        <span>${coin.name}</span>
+
+        <strong style="color:green">
+          +${coin.price_change_percentage_24h.toFixed(2)}%
+        </strong>
+
+      </div>
+
+    `).join("");
+
+    losers.innerHTML = topLosers.map(coin => `
+
+      <div class="market-item">
+
+        <span>${coin.name}</span>
+
+        <strong style="color:red">
+          ${coin.price_change_percentage_24h.toFixed(2)}%
+        </strong>
+
+      </div>
+
+    `).join("");
+
+  } catch (err) {
+
+    gainers.innerHTML = "<p>Unable to load market.</p>";
+    losers.innerHTML = "<p>Unable to load market.</p>";
+
+    console.error(err);
+
   }
 
-  return await res.json();
 }
+
+loadMarket();

@@ -1,63 +1,25 @@
-export function Header(){
+export default function Header() {
+  return `
+    <header class="header">
 
-return `
+      <div class="logo">
+        🚀 CryptoDash
+      </div>
 
-<header class="header">
+      <nav>
 
-<div class="container">
+        <a href="#">Dashboard</a>
 
+        <a href="#">Markets</a>
 
-<div class="logo">
+        <a href="#">About</a>
 
-<h2>
-🚀 CryptoDash
-</h2>
+        <button id="themeBtn">
+          🌙
+        </button>
 
-</div>
+      </nav>
 
-
-
-<nav class="nav">
-
-
-<a href="/">
-Home
-</a>
-
-
-<a href="#">
-Markets
-</a>
-
-
-<a href="#">
-Dashboard
-</a>
-
-
-<a href="#">
-About
-</a>
-
-
-
-<button 
-id="themeBtn"
-class="theme-btn">
-
-🌙
-
-</button>
-
-
-</nav>
-
-
-</div>
-
-</header>
-
-
-`;
-
+    </header>
+  `;
 }

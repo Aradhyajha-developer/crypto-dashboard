@@ -1,136 +1,166 @@
-export function Home(){
+export default function Home() {
 
 return `
 
+<main class="dashboard">
 
-<section class="dashboard container">
-
-
-<div class="hero">
-
+<section class="hero">
 
 <h1>
+
 🚀 CryptoDash
+
 </h1>
 
-
 <p>
-Track real-time cryptocurrency prices,
-charts and market trends.
+
+Track cryptocurrency prices in real time.
+
 </p>
 
+</section>
 
 
-<div class="search-box">
 
+<section class="search-box">
 
 <input
-
-type="text"
 
 id="search"
 
 placeholder="Search Bitcoin, Ethereum..."
 
->
+autocomplete="off"
 
+/>
 
-
-<button id="searchBtn">
+<button>
 
 Search
 
 </button>
 
-
-</div>
-
-
-
-<div id="suggestions"></div>
-
-
-</div>
+</section>
 
 
 
-
-
-
-<section class="dashboard-grid">
-
-
-
-
-
-<!-- Coin Details -->
+<section class="stats">
 
 <div class="card">
 
+<h3>Bitcoin</h3>
 
-<h3>
-💰 Coin Details
-</h3>
+<p>$67,000</p>
+
+</div>
+
+<div class="card">
+
+<h3>Market Cap</h3>
+
+<p>$2.5T</p>
+
+</div>
+
+<div class="card">
+
+<h3>24h Volume</h3>
+
+<p>$90B</p>
+
+</div>
+
+</section>
 
 
 
-<div id="loader"></div>
+<section class="market-layout">
 
+<div class="card">
 
+<h2>Search Result</h2>
 
 <div id="results">
 
-Search a coin to view details
+Search a cryptocurrency.
 
 </div>
 
-
 </div>
 
-
-
-
-
-
-
-<!-- Chart -->
 
 
 <div class="card">
 
+<h2>Favorites</h2>
 
-<h3>
-📈 Price History
-</h3>
+<ul id="favList">
 
-
-
-<canvas id="priceChart">
-
-</canvas>
-
+</ul>
 
 </div>
 
+</section>
 
 
 
+<section class="card chart">
+
+<h2>
+
+7 Day Price Chart
+
+</h2>
+
+<div class="chart-container">
+
+<canvas id="priceChart"></canvas>
+
+</div>
+
+</section>
 
 
 
+<section class="card converter">
+
+<h2>
+
+USD → INR Converter
+
+</h2>
+
+<input
+
+type="number"
+
+id="amount"
+
+placeholder="Enter USD"
+
+/>
+
+<button id="convertBtn">
+
+Convert
+
+</button>
+
+<h3 id="converted"></h3>
+
+</section>
 
 
-<!-- Gainers -->
 
+<section class="market-layout">
 
 <div class="card">
 
+<h2>
 
-<h3>
-🔥 Top Gainers
-</h3>
+🚀 Top Gainers
 
-
+</h2>
 
 <div id="gainers">
 
@@ -138,27 +168,17 @@ Loading...
 
 </div>
 
-
-
 </div>
 
 
 
-
-
-
-
-<!-- Losers -->
-
-
 <div class="card">
 
+<h2>
 
-<h3>
 📉 Top Losers
-</h3>
 
-
+</h2>
 
 <div id="losers">
 
@@ -166,90 +186,11 @@ Loading...
 
 </div>
 
-
-
 </div>
-
-
-
-
-
-
-
-
-
-<!-- Favorites -->
-
-
-<div class="card">
-
-
-<h3>
-⭐ My Favorites
-</h3>
-
-
-
-<ul id="favList">
-
-</ul>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- Converter -->
-
-
-<div class="card converter">
-
-
-<h3>
-💱 USD → INR
-</h3>
-
-
-
-<input
-
-type="number"
-
-id="usd"
-
-placeholder="Enter USD amount"
-
->
-
-
-
-<h2 id="inr">
-
-₹0
-
-</h2>
-
-
-
-</div>
-
-
-
-
 
 </section>
 
-
-</section>
-
-
+</main>
 
 `;
 

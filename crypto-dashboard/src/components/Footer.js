@@ -1,19 +1,25 @@
-export function Footer(){
+export default function Footer() {
 
-return `
+  const year = new Date().getFullYear();
 
-<footer class="footer">
+  return `
 
-<div class="container">
+    <footer class="footer">
 
-<p>
-© 2026 CryptoDash | Built with Vite & JavaScript
-</p>
+      <p>
 
-</div>
+        © ${year} CryptoDash
 
-</footer>
+      </p>
 
-`;
+      <small>
+
+        Built with Vite • CoinGecko API • Chart.js
+
+      </small>
+
+    </footer>
+
+  `;
 
 }

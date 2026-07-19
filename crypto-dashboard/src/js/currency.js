@@ -1,17 +1,15 @@
-const API =
-"https://api.exchangerate-api.com/v4/latest/USD";
+export async function usdToInr(amount) {
 
+  const res = await fetch(
+    "https://open.er-api.com/v6/latest/USD"
+  );
 
-export async function convertUSD(amount){
+  if (!res.ok) {
+    throw new Error("Exchange rate unavailable");
+  }
 
-const res =
-await fetch(API);
+  const data = await res.json();
 
-
-const data =
-await res.json();
-
-
-return amount * data.rates.INR;
+  return amount * data.rates.INR;
 
 }

@@ -2,9 +2,13 @@ import Chart from "chart.js/auto";
 
 let chart = null;
 
-export function renderChart(history, coin) {
+export function createChart(history) {
 
-  const ctx = document.getElementById("priceChart");
+  const canvas = document.getElementById("priceChart");
+
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
 
   if (chart) {
     chart.destroy();
@@ -24,7 +28,7 @@ export function renderChart(history, coin) {
 
         {
 
-          label: `${coin} Price (USD)`,
+          label: "Price (USD)",
 
           data: history.prices.map(item => item[1]),
 
@@ -34,7 +38,9 @@ export function renderChart(history, coin) {
 
           fill: true,
 
-          tension: .4
+          tension: .4,
+
+          pointRadius: 2
 
         }
 
@@ -46,7 +52,27 @@ export function renderChart(history, coin) {
 
       responsive: true,
 
-      maintainAspectRatio: false
+      maintainAspectRatio: false,
+
+      plugins: {
+
+        legend: {
+
+          display: true
+
+        }
+
+      },
+
+      scales: {
+
+        y: {
+
+          beginAtZero: false
+
+        }
+
+      }
 
     }
 
