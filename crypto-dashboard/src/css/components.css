@@ -1,0 +1,23 @@
+.card{
+    background:#fff;
+    border-radius:16px;
+    padding:25px;
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+}
+
+button{
+    background:#2563eb;
+    color:white;
+    padding:12px 22px;
+    border-radius:8px;
+    font-weight:600;
+}
+
+button:hover{
+    background:#1d4ed8;
+}

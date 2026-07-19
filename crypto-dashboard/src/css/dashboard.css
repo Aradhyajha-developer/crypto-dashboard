@@ -1,0 +1,62 @@
+.dashboard{
+
+    padding:50px 0;
+
+}
+
+.hero{
+
+    text-align:center;
+
+    margin-bottom:40px;
+
+}
+
+.hero h1{
+
+    font-size:42px;
+
+    margin-bottom:10px;
+}
+
+.hero p{
+
+    color:#666;
+
+    margin-bottom:30px;
+
+}
+
+.search-box{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:15px;
+
+}
+
+.search-box input{
+
+    width:350px;
+
+    padding:15px;
+
+}
+
+.search-box button{
+
+    padding:15px 30px;
+
+}
+
+.dashboard-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:25px;
+
+}

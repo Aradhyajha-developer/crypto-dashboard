@@ -1,0 +1,39 @@
+.container{
+    width:90%;
+    max-width:1200px;
+    margin:auto;
+}
+
+.header{
+    background:#0f172a;
+    color:#fff;
+    padding:18px 0;
+    position:sticky;
+    top:0;
+    z-index:100;
+}
+
+.header .container{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.nav{
+    display:flex;
+    gap:25px;
+    align-items:center;
+}
+
+.nav a{
+    color:white;
+    font-weight:500;
+}
+
+.footer{
+    background:#0f172a;
+    color:white;
+    text-align:center;
+    padding:20px;
+    margin-top:60px;
+}
