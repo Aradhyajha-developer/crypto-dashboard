@@ -1,5 +1,10 @@
 import { fetchCoin } from "./api.js";
 import { renderChart } from "./chart.js";
+import {
+  addFavorite,
+  getFavorites,
+  isFavorite
+} from "./storage.js";
 
 window.addEventListener("DOMContentLoaded", () => {
 
@@ -7,6 +12,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const searchBtn = document.getElementById("searchBtn");
   const coinData = document.getElementById("coinData");
   const spinner = document.getElementById("spinner");
+  renderFavorites();
 
   searchBtn.addEventListener("click", loadCoin);
   searchInput.addEventListener("keydown", (e) => {
@@ -44,11 +50,25 @@ renderChart(history, data.name);
       spinner.innerHTML = "";
 
       coinData.innerHTML = `
+      const favoriteBtn = document.getElementById("favoriteBtn");
+
+favoriteBtn.addEventListener("click", () => {
+
+  addFavorite(data.id);
+
+  renderFavorites();
+
+  favoriteBtn.textContent = "❤️ Saved";
+
+});
         <h2>${data.name}</h2>
         <img src="${data.image.small}" alt="${data.name}">
         <p><strong>Price:</strong> $${data.market_data.current_price.usd}</p>
         <p><strong>24h Change:</strong> ${data.market_data.price_change_percentage_24h.toFixed(2)}%</p>
         <p><strong>Market Cap:</strong> $${data.market_data.market_cap.usd.toLocaleString()}</p>
+        <button id="favoriteBtn">
+  ${isFavorite(data.id) ? "❤️ Saved" : "🤍 Add to Favorites"}
+</button>
       `;
 
     } catch (err) {
@@ -66,3 +86,26 @@ spinner.innerHTML = "";
   }
 
 });
+function renderFavorites() {
+
+  const list = document.getElementById("favorites");
+
+  const favorites = getFavorites();
+
+  if (!favorites.length) {
+
+    list.innerHTML = "<li>No favorites yet.</li>";
+
+    return;
+
+  }
+
+  list.innerHTML = favorites
+    .map(
+      coin => `
+        <li>${coin}</li>
+      `
+    )
+    .join("");
+
+}
