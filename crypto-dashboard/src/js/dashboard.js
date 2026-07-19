@@ -5,18 +5,39 @@ window.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("search");
   const searchBtn = document.getElementById("searchBtn");
   const coinData = document.getElementById("coinData");
+  const spinner = document.getElementById("spinner");
 
   searchBtn.addEventListener("click", loadCoin);
+  searchInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    loadCoin();
+  }
+});
 
   async function loadCoin() {
 
     const coin = searchInput.value.trim().toLowerCase();
+    spinner.innerHTML = `
+  <div class="spinner" style="display:block;">
+    <div class="loader"></div>
+    <p>Loading...</p>
+  </div>
+`;
+
+coinData.innerHTML = "";
 
     if (!coin) return;
+    if (!coin) {
+  coinData.innerHTML = `
+    <p style="color:red;">Please enter a coin name.</p>
+  `;
+  return;
+}
 
     try {
 
       const data = await fetchCoin(coin);
+      spinner.innerHTML = "";
 
       coinData.innerHTML = `
         <h2>${data.name}</h2>
@@ -28,9 +49,13 @@ window.addEventListener("DOMContentLoaded", () => {
 
     } catch (err) {
 
-      coinData.innerHTML = `
-        <p style="color:red;">Coin not found.</p>
-      `;
+    coinData.innerHTML = `
+  <div class="error-card">
+    <h3>❌ Coin Not Found</h3>
+    <p>Please enter a valid cryptocurrency name.</p>
+  </div>
+`;
+spinner.innerHTML = "";
 
     }
 
