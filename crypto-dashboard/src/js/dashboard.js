@@ -7,6 +7,8 @@ import {
   isFavorite
 } from "./storage.js";
 import { fetchMarket } from "./market.js";
+import {convertUSD}
+from "./currency.js";
 
 window.addEventListener("DOMContentLoaded", () => {
 
@@ -125,6 +127,37 @@ function renderFavorites() {
   });
 
 }
+const usdInput = document.getElementById("usd");
+
+
+usdInput.addEventListener(
+"input",
+async()=>{
+
+
+const value = usdInput.value;
+
+
+if(!value) {
+
+document.getElementById("inr").innerHTML = "₹0";
+
+return;
+
+}
+
+
+
+const inr = await convertUSD(value);
+
+
+
+document.getElementById("inr")
+.innerHTML =
+`₹ ${inr.toFixed(2)}`;
+
+
+});
 async function loadMarket() {
 
   try {
