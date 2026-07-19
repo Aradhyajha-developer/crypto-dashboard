@@ -6,6 +6,7 @@ import {
   getFavorites,
   isFavorite
 } from "./storage.js";
+import { fetchMarket } from "./market.js";
 
 window.addEventListener("DOMContentLoaded", () => {
 
@@ -14,6 +15,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const coinData = document.getElementById("coinData");
   const spinner = document.getElementById("spinner");
   renderFavorites();
+  loadMarket();
 
   searchBtn.addEventListener("click", loadCoin);
   searchInput.addEventListener("keydown", (e) => {
@@ -121,5 +123,43 @@ function renderFavorites() {
     });
 
   });
+
+}
+async function loadMarket() {
+
+  try {
+
+    const data = await fetchMarket();
+
+    const gainers = [...data]
+      .sort((a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h)
+      .slice(0, 5);
+
+    const losers = [...data]
+      .sort((a, b) => a.price_change_percentage_24h - b.price_change_percentage_24h)
+      .slice(0, 5);
+
+    document.getElementById("gainers").innerHTML = gainers
+      .map(
+        coin => `
+          <p>🟢 ${coin.name} (${coin.price_change_percentage_24h.toFixed(2)}%)</p>
+        `
+      )
+      .join("");
+
+    document.getElementById("losers").innerHTML = losers
+      .map(
+        coin => `
+          <p>🔴 ${coin.name} (${coin.price_change_percentage_24h.toFixed(2)}%)</p>
+        `
+      )
+      .join("");
+
+  } catch (err) {
+
+    document.getElementById("gainers").innerHTML = "Unable to load";
+    document.getElementById("losers").innerHTML = "Unable to load";
+
+  }
 
 }

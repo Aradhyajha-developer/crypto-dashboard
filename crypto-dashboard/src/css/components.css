@@ -113,3 +113,17 @@ button:hover{
 .favorite-item button:hover{
     background:#dc2626;
 }
+#gainers p,
+#losers p{
+    padding:8px 0;
+    border-bottom:1px solid #e5e7eb;
+    font-size:14px;
+}
+
+#gainers p{
+    color:#16a34a;
+}
+
+#losers p{
+    color:#dc2626;
+}

@@ -64,3 +64,20 @@
     width:100%;
     height:320px;
 }
+#usd{
+    width:100%;
+    padding:12px;
+    margin:15px 0;
+    border:1px solid #d1d5db;
+    border-radius:8px;
+}
+
+#convertBtn{
+    width:100%;
+    margin-bottom:15px;
+}
+
+#inrResult{
+    text-align:center;
+    color:#2563eb;
+}

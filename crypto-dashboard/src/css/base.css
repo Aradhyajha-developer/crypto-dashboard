@@ -56,3 +56,63 @@ ul{
     list-style:none;
 
 }
+/* ==========================
+   Dark Theme
+========================== */
+
+body.dark{
+    background:#0f172a;
+    color:#f8fafc;
+    transition:.3s;
+}
+
+body.dark .card{
+    background:#1e293b;
+    color:white;
+}
+
+body.dark input{
+    background:#334155;
+    color:white;
+    border:1px solid #475569;
+}
+
+body.dark .header{
+    background:#020617;
+}
+
+body.dark .footer{
+    background:#020617;
+}
+/* ==========================
+   Theme Button
+========================== */
+
+.theme-btn{
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    padding:10px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+    transition:all .3s ease;
+}
+
+.theme-btn:hover{
+    background:#1d4ed8;
+    transform:scale(1.05);
+}
+
+/* Better Dark Theme */
+
+body.dark a{
+    color:#ffffff;
+}
+
+body.dark h1,
+body.dark h2,
+body.dark h3,
+body.dark p{
+    color:#ffffff;
+}
