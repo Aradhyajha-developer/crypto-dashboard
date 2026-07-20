@@ -1,197 +1,177 @@
 export default function Home() {
+  return `
+    <main class="dashboard">
 
-return `
+      <!-- Hero -->
+      <section class="hero">
+        <div class="hero-content">
+          <h1>🚀 CryptoDash</h1>
+          <p>
+            Track live cryptocurrency prices, market trends,
+            gainers, losers and your favorite coins in one place.
+          </p>
 
-<main class="dashboard">
+          <div class="search-box">
+            <input
+              id="search"
+              type="text"
+              placeholder="Search Bitcoin, Ethereum, Solana..."
+              autocomplete="off"
+            />
 
-<section class="hero">
+            <button id="searchBtn">
+              Search
+            </button>
+          </div>
 
-<h1>
+          <div id="suggestions" class="suggestions"></div>
+        </div>
+      </section>
 
-🚀 CryptoDash
+      <!-- Market Overview -->
+      <section id="market" class="overview">
 
-</h1>
+        <h2>📊 Market Overview</h2>
 
-<p>
+        <div class="overview-grid">
 
-Track cryptocurrency prices in real time.
+          <div class="overview-card">
+            <h3>Total Market Cap</h3>
+            <p id="marketCap">Loading...</p>
+          </div>
 
-</p>
+          <div class="overview-card">
+            <h3>24H Volume</h3>
+            <p id="marketVolume">Loading...</p>
+          </div>
 
-</section>
+          <div class="overview-card">
+            <h3>BTC Dominance</h3>
+            <p id="btcDom">Loading...</p>
+          </div>
 
+          <div class="overview-card">
+            <h3>ETH Dominance</h3>
+            <p id="ethDom">Loading...</p>
+          </div>
 
+        </div>
 
-<section class="search-box">
+      </section>
 
-<input
+      <!-- Coin Details -->
+      <section class="coin-section">
 
-id="search"
+        <div id="results">
 
-placeholder="Search Bitcoin, Ethereum..."
+          <div class="placeholder-card">
 
-autocomplete="off"
+            <h2>Search Any Coin</h2>
 
-/>
+            <p>
+              Search Bitcoin, Ethereum, Solana and
+              more to view live data.
+            </p>
 
-<button>
+          </div>
 
-Search
+        </div>
 
-</button>
+      </section>
 
-</section>
+      <!-- Chart -->
+      <section class="chart-section">
 
+        <h2>📈 7 Day Price Chart</h2>
 
+        <div class="chart-card">
 
-<section class="stats">
+          <canvas id="priceChart"></canvas>
 
-<div class="card">
+        </div>
 
-<h3>Bitcoin</h3>
+      </section>
 
-<p>$67,000</p>
+      <!-- Widgets -->
+      <section class="widgets">
 
-</div>
+        <div class="widget">
 
-<div class="card">
+          <h2>🔥 Top Gainers</h2>
 
-<h3>Market Cap</h3>
+          <ul id="gainers">
 
-<p>$2.5T</p>
+            <li>Loading...</li>
 
-</div>
+          </ul>
 
-<div class="card">
+        </div>
 
-<h3>24h Volume</h3>
+        <div class="widget">
 
-<p>$90B</p>
+          <h2>📉 Top Losers</h2>
 
-</div>
+          <ul id="losers">
 
-</section>
+            <li>Loading...</li>
 
+          </ul>
 
+        </div>
 
-<section class="market-layout">
+      </section>
 
-<div class="card">
+      <!-- Converter -->
+      <section class="converter">
 
-<h2>Search Result</h2>
+        <h2>💱 USD → INR Converter</h2>
 
-<div id="results">
+        <div class="converter-box">
 
-Search a cryptocurrency.
+          <input
+            type="number"
+            id="usd"
+            placeholder="Enter USD"
+          >
 
-</div>
+          <button id="convertBtn">
+            Convert
+          </button>
 
-</div>
+          <h3 id="inrResult">
+            ₹0
+          </h3>
 
+        </div>
 
+      </section>
 
-<div class="card">
+      <!-- Favorites -->
+      <section
+        id="favorites"
+        class="favorites"
+      >
 
-<h2>Favorites</h2>
+        <h2>⭐ My Favorites</h2>
 
-<ul id="favList">
+        <ul id="favList">
 
-</ul>
+          <li>No favorites yet.</li>
 
-</div>
+        </ul>
 
-</section>
+      </section>
 
+      <!-- Loader -->
+      <div
+        id="loader"
+        class="loader hidden"
+      >
 
+        <div class="spinner"></div>
 
-<section class="card chart">
+      </div>
 
-<h2>
-
-7 Day Price Chart
-
-</h2>
-
-<div class="chart-container">
-
-<canvas id="priceChart"></canvas>
-
-</div>
-
-</section>
-
-
-
-<section class="card converter">
-
-<h2>
-
-USD → INR Converter
-
-</h2>
-
-<input
-
-type="number"
-
-id="amount"
-
-placeholder="Enter USD"
-
-/>
-
-<button id="convertBtn">
-
-Convert
-
-</button>
-
-<h3 id="converted"></h3>
-
-</section>
-
-
-
-<section class="market-layout">
-
-<div class="card">
-
-<h2>
-
-🚀 Top Gainers
-
-</h2>
-
-<div id="gainers">
-
-Loading...
-
-</div>
-
-</div>
-
-
-
-<div class="card">
-
-<h2>
-
-📉 Top Losers
-
-</h2>
-
-<div id="losers">
-
-Loading...
-
-</div>
-
-</div>
-
-</section>
-
-</main>
-
-`;
-
+    </main>
+  `;
 }

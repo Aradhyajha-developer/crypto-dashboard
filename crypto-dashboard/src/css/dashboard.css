@@ -1,229 +1,33 @@
-.hero{
-
-text-align:center;
-
-padding:60px 20px;
-
-margin-bottom:30px;
-
-}
-
-.hero h1{
-
-font-size:48px;
-
-font-weight:700;
-
-margin-bottom:10px;
-
-color:var(--primary);
-
-}
-
-.hero p{
-
-color:var(--text-light);
-
-font-size:18px;
-
-}
-
-
-
-.search-box{
-
+.coin-row{
 display:flex;
-
-gap:15px;
-
-margin-bottom:35px;
-
+justify-content:space-between;
+align-items:center;
+padding:12px 0;
+gap:10px;
 }
 
-.search-box input{
-
-flex:1;
-
-margin:0;
-
+.coin-info{
+display:flex;
+align-items:center;
+gap:10px;
 }
 
-.search-box button{
-
-min-width:140px;
-
+.coin-info img{
+border-radius:50%;
 }
 
-
-
-.stats .card{
-
-text-align:center;
-
+.coin-price{
+text-align:right;
+}
+.converter-box input:focus{
+outline:none;
+border-color:#2563eb;
+box-shadow:0 0 0 3px rgba(37,99,235,.15);
 }
 
-.stats h3{
-
-font-size:18px;
-
-margin-bottom:10px;
-
-}
-
-.stats p{
-
-font-size:28px;
-
+#inrResult{
+font-size:1.5rem;
 font-weight:700;
-
-}
-
-
-
-.chart{
-
-margin-top:35px;
-
-}
-
-
-
-.converter{
-
-margin-top:35px;
-
-text-align:center;
-
-}
-
-.converter input{
-
-max-width:320px;
-
-margin:20px auto;
-
-display:block;
-
-}
-
-#converted{
-
-margin-top:15px;
-
-font-size:24px;
-
-font-weight:bold;
-
-color:var(--success);
-
-}
-
-
-
-#results{
-
-margin-top:20px;
-
-}
-
-
-
-.coin-card h2{
-
-margin:15px 0;
-
-}
-
-.coin-card h3{
-
-font-size:30px;
-
-color:var(--primary);
-
-margin:15px 0;
-
-}
-
-.coin-card p{
-
-margin:8px 0;
-
-}
-
-
-
-.market-item:last-child{
-
-border-bottom:none;
-
-}
-
-
-
-.favorite-item:last-child{
-
-border-bottom:none;
-
-}
-
-
-
-.card{
-
-animation:fadeUp .4s ease;
-
-}
-
-
-
-@keyframes fadeUp{
-
-from{
-
-opacity:0;
-
-transform:translateY(20px);
-
-}
-
-to{
-
-opacity:1;
-
-transform:translateY(0);
-
-}
-
-}
-
-
-
-body.dark .card{
-
-background:#1e293b;
-
-}
-
-
-
-body.dark .header{
-
-background:#1e293b;
-
-}
-
-
-
-body.dark .footer{
-
-background:#1e293b;
-
-}
-
-
-
-body.dark button{
-
-background:#3b82f6;
-
+color:#16a34a;
+margin-top:10px;
 }

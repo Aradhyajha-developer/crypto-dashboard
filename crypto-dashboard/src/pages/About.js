@@ -1,127 +1,86 @@
-export function About(){
+export default function About(){
 
 return `
 
-<section class="about container">
+<section class="about-page">
 
-
-<div class="hero">
-
+<div class="about-card">
 
 <h1>
-About CryptoDash
+🚀 About CryptoDash
 </h1>
 
 
 <p>
-A modern fintech dashboard for tracking
-real-time cryptocurrency prices,
-market trends and analytics.
+
+CryptoDash is a modern real-time cryptocurrency
+tracking dashboard built for fintech applications.
+
 </p>
-
-
-</div>
-
-
-
-<div class="dashboard-grid">
-
-
-
-<div class="card">
-
-<h2>
-🚀 Project Objective
-</h2>
 
 
 <p>
 
-CryptoDash provides users free access to live
-cryptocurrency market data before subscribing
-to premium financial services.
+It provides live market data, interactive charts,
+favorites management and market insights using
+public cryptocurrency APIs.
 
 </p>
 
-</div>
 
 
+<div class="about-grid">
 
 
+<div class="about-box">
 
-<div class="card">
-
-<h2>
-⚡ Features
-</h2>
-
-
-<ul>
-
-<li>
-Real-time Crypto Prices
-</li>
-
-
-<li>
-7 Days Price Chart
-</li>
-
-
-<li>
-Favorites using LocalStorage
-</li>
-
-
-<li>
-Top Gainers & Losers
-</li>
-
-
-<li>
-USD to INR Converter
-</li>
-
-
-<li>
-Dark Mode
-</li>
-
-
-</ul>
-
-
-</div>
-
-
-
-
-
-<div class="card">
-
-<h2>
-🛠 Technology Stack
-</h2>
-
+<h3>
+📊 Live Data
+</h3>
 
 <p>
-
-Vite + JavaScript + CSS + CoinGecko API + Chart.js
-
+Real-time cryptocurrency prices powered by APIs.
 </p>
 
+</div>
+
+
+
+<div class="about-box">
+
+<h3>
+📈 Analytics
+</h3>
+
+<p>
+Interactive 7 day price charts and market trends.
+</p>
 
 </div>
 
 
 
 
+<div class="about-box">
+
+<h3>
+⚡ Performance
+</h3>
+
+<p>
+Responsive and optimized dashboard experience.
+</p>
 
 </div>
 
+
+
+</div>
+
+
+</div>
 
 </section>
-
 
 `;
 

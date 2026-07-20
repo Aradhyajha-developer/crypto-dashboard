@@ -1,101 +1,29 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
 
-    <title>CryptoDash - Real Time Crypto Tracker</title>
+<meta charset="UTF-8">
 
-    <meta
-      name="description"
-      content="Track live cryptocurrency prices with charts and market analysis"
-    />
-  </head>
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
 
-  <body>
-    <div id="app">
-      <!-- Header -->
+<title>CryptoDash | Live Crypto Tracker</title>
 
-      <header class="header">
-        <h1>Crypto</h1>
+<meta
+name="description"
+content="Real Time Cryptocurrency Dashboard using CoinGecko API">
 
-        <button id="themeBtn">🌙</button>
-      </header>
+<link rel="icon" href="/logo.png">
 
-      <!-- Search Section -->
+</head>
 
-      <section class="search-box">
-        <input
-          type="text"
-          id="search"
-          placeholder="Search Bitcoin, Ethereum..."
-        />
+<body>
 
-        <button id="searchBtn">Search</button>
-      </section>
+<div id="app"></div>
 
-      <!-- Loader -->
+<script type="module" src="/src/main.js"></script>
 
-      <div id="loader"></div>
+</body>
 
-      <!-- Search Result -->
-
-      <section id="results"></section>
-
-      <!-- Dashboard Cards -->
-
-      <section class="grid">
-        <!-- Favorites -->
-
-        <div class="card">
-          <h2>⭐ My Favorites</h2>
-
-          <ul id="favList"></ul>
-        </div>
-
-        <!-- Top Gainers -->
-
-        <div class="card">
-          <h2>🔥 Top Gainers</h2>
-
-          <div id="gainers">Loading...</div>
-        </div>
-
-        <!-- Top Losers -->
-
-        <div class="card">
-          <h2>📉 Top Losers</h2>
-
-          <div id="losers">Loading...</div>
-        </div>
-      </section>
-
-      <!-- Currency Converter -->
-
-      <section class="converter card">
-        <h2>💱 USD → INR Converter</h2>
-
-        <input id="usd" type="number" placeholder="Enter USD amount" />
-
-        <p id="inr">₹0</p>
-      </section>
-
-      <!-- Chart -->
-
-      <section class="chart-section card">
-        <h2>Price History</h2>
-
-        <canvas id="priceChart"> </canvas>
-      </section>
-
-      <!-- Footer -->
-
-      <footer>
-        <p>© 2026 CryptoDash | Real Time Market Tracker</p>
-      </footer>
-    </div>
-
-    <script type="module" src="/src/main.js"></script>
-  </body>
 </html>

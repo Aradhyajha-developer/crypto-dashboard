@@ -1,68 +1,185 @@
-import { fetchMarket } from "./api.js";
+import {
+  fetchMarketOverview,
+  fetchTopGainers,
+  fetchTopLosers
+} from "./api.js";
 
-const gainers = document.getElementById("gainers");
-const losers = document.getElementById("losers");
+import {
+  formatCurrency,
+  formatNumber,
+  formatPercent,
+  showError
+} from "./utils.js";
 
-export async function loadMarket() {
+/* ---------------- Helpers ---------------- */
 
-  if (!gainers || !losers) return;
+function setText(id, value) {
+  const el = document.getElementById(id);
 
-  gainers.innerHTML = "Loading...";
-  losers.innerHTML = "Loading...";
+  if (el) {
+    el.textContent = value;
+  }
+}
+
+/* ---------------- Market Overview ---------------- */
+
+export async function loadMarketOverview() {
 
   try {
 
-    const coins = await fetchMarket();
+    const market = await fetchMarketOverview();
 
-    const sorted = [...coins].sort(
-      (a, b) =>
-        b.price_change_percentage_24h -
-        a.price_change_percentage_24h
+    setText(
+      "marketCap",
+      formatCurrency(market.total_market_cap.usd)
     );
 
-    const topGainers = sorted.slice(0, 5);
+    setText(
+      "marketVolume",
+      formatCurrency(market.total_volume.usd)
+    );
 
-    const topLosers = [...sorted]
-      .reverse()
-      .slice(0, 5);
+    setText(
+      "btcDom",
+      formatPercent(market.market_cap_percentage.btc)
+    );
 
-    gainers.innerHTML = topGainers.map(coin => `
+    setText(
+      "ethDom",
+      formatPercent(market.market_cap_percentage.eth)
+    );
 
-      <div class="market-item">
+  } catch (error) {
 
-        <span>${coin.name}</span>
+    console.error(error);
 
-        <strong style="color:green">
-          +${coin.price_change_percentage_24h.toFixed(2)}%
-        </strong>
-
-      </div>
-
-    `).join("");
-
-    losers.innerHTML = topLosers.map(coin => `
-
-      <div class="market-item">
-
-        <span>${coin.name}</span>
-
-        <strong style="color:red">
-          ${coin.price_change_percentage_24h.toFixed(2)}%
-        </strong>
-
-      </div>
-
-    `).join("");
-
-  } catch (err) {
-
-    gainers.innerHTML = "<p>Unable to load market.</p>";
-    losers.innerHTML = "<p>Unable to load market.</p>";
-
-    console.error(err);
+    setText("marketCap", "--");
+    setText("marketVolume", "--");
+    setText("btcDom", "--");
+    setText("ethDom", "--");
 
   }
 
 }
 
-loadMarket();
+/* ---------------- Render Coin List ---------------- */
+
+function renderCoins(elementId, coins) {
+
+  const list = document.getElementById(elementId);
+
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  coins.forEach((coin) => {
+
+    const li = document.createElement("li");
+
+    const change =
+      Number(coin.price_change_percentage_24h || 0);
+
+    li.innerHTML = `
+      <div class="coin-row">
+
+        <div class="coin-info">
+
+          <img
+            src="${coin.image}"
+            alt="${coin.name}"
+            width="28"
+            height="28"
+          >
+
+          <span>${coin.name}</span>
+
+        </div>
+
+        <div class="coin-price">
+
+          <strong>
+            ${formatCurrency(coin.current_price)}
+          </strong>
+
+          <small
+            style="
+              color:${change >= 0 ? "#16a34a" : "#dc2626"};
+              display:block;
+            "
+          >
+            ${change >= 0 ? "+" : ""}
+            ${change.toFixed(2)}%
+          </small>
+
+        </div>
+
+      </div>
+    `;
+
+    list.appendChild(li);
+
+  });
+
+}
+
+/* ---------------- Top Gainers ---------------- */
+
+export async function loadTopGainers() {
+
+  try {
+
+    const coins = await fetchTopGainers();
+
+    renderCoins("gainers", coins);
+
+  } catch (error) {
+
+    console.error(error);
+
+    showError(
+      document.getElementById("gainers"),
+      "Unable to load gainers."
+    );
+
+  }
+
+}
+
+/* ---------------- Top Losers ---------------- */
+
+export async function loadTopLosers() {
+
+  try {
+
+    const coins = await fetchTopLosers();
+
+    renderCoins("losers", coins);
+
+  } catch (error) {
+
+    console.error(error);
+
+    showError(
+      document.getElementById("losers"),
+      "Unable to load losers."
+    );
+
+  }
+
+}
+
+/* ---------------- Initialize Widgets ---------------- */
+
+export async function loadMarketWidgets() {
+
+  await Promise.all([
+
+    loadMarketOverview(),
+
+    loadTopGainers(),
+
+    loadTopLosers()
+
+  ]);
+
+}

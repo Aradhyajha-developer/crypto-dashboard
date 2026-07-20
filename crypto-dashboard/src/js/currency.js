@@ -1,15 +1,34 @@
-export async function usdToInr(amount) {
+import { fetchUSDtoINR } from "./api.js";
 
-  const res = await fetch(
-    "https://open.er-api.com/v6/latest/USD"
-  );
+let currentRate = 83;
 
-  if (!res.ok) {
-    throw new Error("Exchange rate unavailable");
+export async function getCurrentRate() {
+  try {
+    currentRate = await fetchUSDtoINR();
+    return currentRate;
+  } catch (err) {
+    console.error("Currency API Error:", err);
+    return currentRate;
   }
+}
 
-  const data = await res.json();
+export async function convertUSDToINR(amount) {
+  const rate = await getCurrentRate();
+  return amount * rate;
+}
 
-  return amount * data.rates.INR;
+export async function convertINRToUSD(amount) {
+  const rate = await getCurrentRate();
+  return amount / rate;
+}
 
+export function formatCurrency(value, currency = "INR") {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency
+  }).format(value);
+}
+
+export function getOfflineRate() {
+  return currentRate;
 }

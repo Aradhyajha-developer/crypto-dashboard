@@ -1,61 +1,127 @@
-const KEY = "favorites";
+const FAVORITES = "cryptodash-favorites";
+
+const THEME = "cryptodash-theme";
+
+/* ---------------- Favorites ---------------- */
 
 export function getFavorites() {
 
-  return JSON.parse(
+    return JSON.parse(
 
-    localStorage.getItem(KEY)
+localStorage.getItem(FAVORITES)
 
-  ) || [];
+    ) || [];
 
 }
 
 export function saveFavorite(id) {
 
-  const favorites = getFavorites();
+    const favs = getFavorites();
 
-  if (!favorites.includes(id)) {
+    if (!favs.includes(id)) {
 
-    favorites.push(id);
+        favs.push(id);
+
+    }
 
     localStorage.setItem(
 
-      KEY,
+FAVORITES,
 
-      JSON.stringify(favorites)
+JSON.stringify(favs)
 
     );
-
-  }
 
 }
 
 export function removeFavorite(id) {
 
-  const updated = getFavorites().filter(
+    const favs = getFavorites()
 
-    coin => coin !== id
+        .filter(
 
-  );
+coin => coin !== id
 
-  localStorage.setItem(
+        );
 
-    KEY,
+    localStorage.setItem(
 
-    JSON.stringify(updated)
+FAVORITES,
 
-  );
+JSON.stringify(favs)
+
+    );
 
 }
 
 export function isFavorite(id) {
 
-  return getFavorites().includes(id);
+    return getFavorites()
+
+        .includes(id);
 
 }
 
-export function clearFavorites() {
+/* ---------------- Theme ---------------- */
 
-  localStorage.removeItem(KEY);
+export function saveTheme(theme) {
+
+    localStorage.setItem(
+
+THEME,
+
+theme
+
+    );
+
+}
+
+export function getTheme() {
+
+    return (
+
+localStorage.getItem(THEME)
+
+|| "light"
+
+    );
+
+}
+
+/* ---------------- Generic Cache ---------------- */
+
+export function cacheData(key, value) {
+
+    localStorage.setItem(
+
+key,
+
+JSON.stringify(value)
+
+    );
+
+}
+
+export function getCache(key) {
+
+    const data =
+
+localStorage.getItem(key);
+
+    if (!data) return null;
+
+    return JSON.parse(data);
+
+}
+
+export function clearCache(key) {
+
+    localStorage.removeItem(key);
+
+}
+
+export function clearAllCache() {
+
+    localStorage.clear();
 
 }
