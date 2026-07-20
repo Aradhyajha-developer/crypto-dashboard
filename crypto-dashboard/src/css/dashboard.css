@@ -1,33 +1,534 @@
-.coin-row{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:12px 0;
-gap:10px;
+/* ==========================
+   DASHBOARD
+========================== */
+
+
+.dashboard-container{
+
+    width:90%;
+    max-width:1400px;
+    margin:auto;
+
 }
+
+
+
+
+/* ==========================
+   HERO
+========================== */
+
+
+.hero{
+
+    padding:40px 20px;
+    text-align:center;
+
+}
+
+
+
+.hero h1{
+
+    font-size:42px;
+    margin-bottom:10px;
+
+}
+
+
+
+.hero p{
+
+    color:#64748b;
+    font-size:18px;
+
+}
+
+
+
+
+
+/* ==========================
+   SEARCH
+========================== */
+
+
+.search-box{
+
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    margin-top:25px;
+
+}
+
+
+
+.search-box input{
+
+    width:60%;
+    max-width:500px;
+    padding:15px 20px;
+
+    border-radius:12px;
+    border:1px solid #ddd;
+
+    font-size:16px;
+
+}
+
+
+
+.search-box button{
+
+    padding:15px 25px;
+
+    border:none;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+}
+
+
+
+
+
+/* Suggestions */
+
+
+.suggestions{
+
+    width:60%;
+    max-width:500px;
+
+    margin:10px auto;
+
+    background:white;
+
+    border-radius:12px;
+
+    box-shadow:
+    0 10px 25px rgba(0,0,0,.1);
+
+}
+
+
+
+.suggestion-item{
+
+    padding:12px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    cursor:pointer;
+
+}
+
+
+
+.suggestion-item:hover{
+
+    background:#f1f5f9;
+
+}
+
+
+
+
+
+
+/* ==========================
+   SECTION
+========================== */
+
+
+.section{
+
+    background:white;
+
+    padding:25px;
+
+    margin:25px 0;
+
+    border-radius:18px;
+
+    box-shadow:
+
+    0 10px 30px rgba(0,0,0,.06);
+
+}
+
+
+
+
+
+
+/* ==========================
+   MARKET CARDS
+========================== */
+
+
+.market-grid{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(220px,1fr));
+
+    gap:20px;
+
+}
+
+
+
+.market-card{
+
+    padding:20px;
+
+    border-radius:16px;
+
+    background:#f8fafc;
+
+}
+
+
+
+.market-card h3{
+
+    font-size:14px;
+
+    color:#64748b;
+
+}
+
+
+
+.market-card p{
+
+    font-size:26px;
+
+    font-weight:700;
+
+}
+
+
+
+
+
+
+/* ==========================
+   COIN CARD
+========================== */
+
+
+.coin-card{
+
+    padding:25px;
+
+    border-radius:18px;
+
+    text-align:center;
+
+}
+
+
+
+.coin-card img{
+
+    border-radius:50%;
+
+}
+
+
+
+
+
+.coin-card button{
+
+    margin-top:20px;
+
+    padding:12px 20px;
+
+    border-radius:10px;
+
+    border:none;
+
+    cursor:pointer;
+
+}
+
+
+
+
+
+
+/* ==========================
+   CHART
+========================== */
+
+
+.chart-card{
+
+    background:#f8fafc;
+
+    padding:20px;
+
+    border-radius:16px;
+
+}
+
+
+
+.chart-container{
+
+    width:100%;
+
+    height:350px;
+
+    position:relative;
+
+}
+
+
+
+
+
+
+/* ==========================
+   WIDGETS
+========================== */
+
+
+.widgets{
+
+    display:grid;
+
+    grid-template-columns:
+
+    repeat(auto-fit,minmax(300px,1fr));
+
+    gap:25px;
+
+}
+
+
+
+.widget{
+
+    background:white;
+
+    padding:25px;
+
+    border-radius:18px;
+
+    box-shadow:
+
+    0 10px 30px rgba(0,0,0,.06);
+
+}
+
+
+
+.widget ul{
+
+    list-style:none;
+
+    padding:0;
+
+}
+
+
+
+
+
+
+/* MARKET COIN ROW */
+
+
+.market-coin{
+
+    padding:15px 0;
+
+    border-bottom:1px solid #eee;
+
+}
+
+
+
+.coin-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+
 
 .coin-info{
-display:flex;
-align-items:center;
-gap:10px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
 }
+
+
 
 .coin-info img{
-border-radius:50%;
+
+    border-radius:50%;
+
 }
 
-.coin-price{
-text-align:right;
-}
-.converter-box input:focus{
-outline:none;
-border-color:#2563eb;
-box-shadow:0 0 0 3px rgba(37,99,235,.15);
+
+
+.coin-data{
+
+    text-align:right;
+
 }
 
-#inrResult{
-font-size:1.5rem;
-font-weight:700;
-color:#16a34a;
-margin-top:10px;
+
+
+
+.positive{
+
+    color:#16a34a;
+
+}
+
+
+
+.negative{
+
+    color:#dc2626;
+
+}
+
+
+
+
+
+
+/* ==========================
+   CONVERTER
+========================== */
+
+
+.converter-box{
+
+    display:flex;
+
+    gap:15px;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+
+}
+
+
+
+.converter-box input{
+
+    padding:14px;
+
+    border-radius:10px;
+
+    border:1px solid #ddd;
+
+}
+
+
+
+
+
+/* ==========================
+   FAVORITES
+========================== */
+
+
+#favList{
+
+    list-style:none;
+
+    padding:0;
+
+}
+
+
+
+#favList li{
+
+    padding:15px;
+
+    border-bottom:1px solid #eee;
+
+}
+
+
+
+
+
+
+/* ==========================
+   MOBILE
+========================== */
+
+
+@media(max-width:700px){
+
+
+.dashboard-container{
+
+    width:95%;
+
+}
+
+
+
+.hero h1{
+
+    font-size:32px;
+
+}
+
+
+
+.search-box{
+
+    flex-direction:column;
+
+}
+
+
+
+.search-box input{
+
+    width:100%;
+
+}
+
+
+
+.suggestions{
+
+    width:100%;
+
+}
+
+
 }

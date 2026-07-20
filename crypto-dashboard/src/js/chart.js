@@ -1,179 +1,348 @@
-import {
-    Chart,
-    LineController,
-    LineElement,
-    PointElement,
-    LinearScale,
-    CategoryScale,
-    Title,
-    Tooltip,
-    Legend,
-    Filler
-} from "chart.js";
+import Chart from "chart.js/auto";
 
-Chart.register(
-    LineController,
-    LineElement,
-    PointElement,
-    LinearScale,
-    CategoryScale,
-    Title,
-    Tooltip,
-    Legend,
-    Filler
-);
 
-let chart = null;
+let chartInstance = null;
 
-/* ---------------- Create Chart ---------------- */
 
-export function createChart(canvas, history, coinName = "Bitcoin") {
 
-    if (!canvas || !history?.prices) return;
 
-    const ctx = canvas.getContext("2d");
+/*
+================================
+CREATE PRICE CHART
+================================
+*/
 
-    if (chart) {
-        chart.destroy();
+export function createChart(
+    canvasId,
+    historyData
+){
+
+
+    const canvas =
+    document.getElementById(canvasId);
+
+
+
+    if(!canvas){
+
+        console.error(
+            "Chart canvas not found"
+        );
+
+        return;
+
     }
 
-    const labels = history.prices.map(item =>
-        new Date(item[0]).toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "short"
-        })
+
+
+
+
+    if(
+        !historyData ||
+        !historyData.prices ||
+        historyData.prices.length === 0
+    ){
+
+        console.error(
+            "No chart data available"
+        );
+
+        return;
+
+    }
+
+
+
+
+
+    /*
+    Destroy previous chart
+    */
+
+    if(chartInstance){
+
+        chartInstance.destroy();
+
+        chartInstance = null;
+
+    }
+
+
+
+
+
+
+    const prices =
+    historyData.prices.map(
+        item => item[1]
     );
 
-    const prices = history.prices.map(item => item[1]);
 
-    chart = new Chart(ctx, {
 
-        type: "line",
 
-        data: {
 
-            labels,
+    const labels =
+    historyData.prices.map(
+        item => {
 
-            datasets: [
 
+            const date =
+            new Date(item[0]);
+
+
+            return date.toLocaleDateString(
+                "en-US",
                 {
-
-                    label: `${coinName} Price (USD)`,
-
-                    data: prices,
-
-                    borderColor: "#2563eb",
-
-                    backgroundColor: "rgba(37,99,235,.15)",
-
-                    fill: true,
-
-                    tension: .35,
-
-                    pointRadius: 3,
-
-                    pointHoverRadius: 6,
-
-                    borderWidth: 3
-
+                    month:"short",
+                    day:"numeric"
                 }
+            );
 
-            ]
 
-        },
+        }
+    );
 
-        options: {
 
-            responsive: true,
 
-            maintainAspectRatio: false,
 
-            interaction: {
 
-                intersect: false,
 
-                mode: "index"
+
+    const ctx =
+    canvas.getContext("2d");
+
+
+
+
+
+
+
+    chartInstance = new Chart(
+
+        ctx,
+
+        {
+
+
+            type:"line",
+
+
+
+            data:{
+
+
+                labels,
+
+
+                datasets:[
+
+                    {
+
+
+                        label:"Price USD",
+
+
+                        data:prices,
+
+
+                        borderWidth:3,
+
+
+                        tension:0.4,
+
+
+                        fill:true,
+
+
+                        pointRadius:3,
+
+
+                        pointHoverRadius:6
+
+
+
+                    }
+
+
+                ]
 
             },
 
-            plugins: {
 
-                legend: {
 
-                    display: true
 
-                },
 
-                tooltip: {
 
-                    callbacks: {
 
-                        label(context) {
+            options:{
 
-                            return "$" +
-                                Number(context.raw).toLocaleString();
 
-                        }
+                responsive:true,
 
-                    }
 
-                }
+                maintainAspectRatio:false,
 
-            },
 
-            scales: {
 
-                x: {
+                interaction:{
 
-                    grid: {
 
-                        display: false
+                    mode:"index",
 
-                    }
+
+                    intersect:false
+
 
                 },
 
-                y: {
 
-                    ticks: {
 
-                        callback(value) {
 
-                            return "$" +
-                                Number(value).toLocaleString();
+
+                plugins:{
+
+
+                    legend:{
+
+
+                        display:true
+
+
+                    },
+
+
+
+
+                    tooltip:{
+
+
+                        callbacks:{
+
+
+                            label(context){
+
+
+                                return (
+
+                                    "$ " +
+
+                                    Number(
+                                        context.raw
+                                    )
+                                    .toLocaleString()
+
+                                );
+
+
+                            }
+
 
                         }
 
+
                     }
 
+
+                },
+
+
+
+
+
+
+
+                scales:{
+
+
+                    y:{
+
+
+                        ticks:{
+
+
+                            callback(value){
+
+
+                                return (
+
+                                    "$" +
+
+                                    Number(value)
+                                    .toLocaleString()
+
+                                );
+
+
+                            }
+
+
+                        }
+
+
+                    },
+
+
+
+                    x:{
+
+
+                        grid:{
+
+
+                            display:false
+
+
+                        }
+
+
+                    }
+
+
                 }
+
+
+
 
             }
 
+
+
+
         }
 
-    });
+
+    );
+
+
 
 }
 
-/* ---------------- Update Chart ---------------- */
 
-export function updateChart(canvas, history, coinName) {
 
-    createChart(canvas, history, coinName);
 
-}
 
-/* ---------------- Destroy ---------------- */
 
-export function destroyChart() {
 
-    if (chart) {
+/*
+================================
+DESTROY CHART
+================================
+*/
 
-        chart.destroy();
 
-        chart = null;
+export function destroyChart(){
+
+
+    if(chartInstance){
+
+
+        chartInstance.destroy();
+
+
+        chartInstance=null;
+
 
     }
+
 
 }

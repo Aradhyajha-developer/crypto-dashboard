@@ -1,218 +1,351 @@
-/* =========================
+/* ==========================
    TABLET
-========================= */
+========================== */
+
 
 @media(max-width:1024px){
 
-.dashboard{
 
-width:94%;
+    .dashboard-container{
+
+        width:95%;
+
+    }
+
+
+
+    .market-grid{
+
+        grid-template-columns:
+
+        repeat(2,1fr);
+
+    }
+
+
+
+    .widgets{
+
+        grid-template-columns:
+
+        1fr;
+
+    }
+
+
+
+    .hero h1{
+
+        font-size:36px;
+
+    }
+
 
 }
 
 
-.hero h1{
-
-font-size:2.5rem;
-
-}
-
-
-.header{
-
-padding:15px 3%;
-
-}
-
-
-.coin-info-grid{
-
-grid-template-columns:1fr;
-
-}
-
-}
 
 
 
-/* =========================
+
+
+
+/* ==========================
    MOBILE
-========================= */
-
-@media(max-width:768px){
+========================== */
 
 
-.header{
+@media(max-width:700px){
 
-flex-direction:column;
 
-gap:15px;
+
+    header{
+
+
+        flex-direction:column;
+
+
+        gap:15px;
+
+
+        padding:15px;
+
+
+    }
+
+
+
+
+
+    nav{
+
+
+        flex-wrap:wrap;
+
+
+        justify-content:center;
+
+
+        gap:15px;
+
+
+    }
+
+
+
+
+
+    .dashboard-container{
+
+
+        width:95%;
+
+
+    }
+
+
+
+
+
+    .hero{
+
+
+        padding:25px 10px;
+
+
+    }
+
+
+
+
+
+    .hero h1{
+
+
+        font-size:30px;
+
+
+    }
+
+
+
+
+
+    .hero p{
+
+
+        font-size:15px;
+
+
+    }
+
+
+
+
+
+    .search-box{
+
+
+        flex-direction:column;
+
+
+    }
+
+
+
+
+
+    .search-box input{
+
+
+        width:100%;
+
+
+    }
+
+
+
+
+
+    .search-box button{
+
+
+        width:100%;
+
+
+    }
+
+
+
+
+
+    .suggestions{
+
+
+        width:100%;
+
+
+    }
+
+
+
+
+
+
+
+    .market-grid{
+
+
+        grid-template-columns:
+
+
+        1fr;
+
+
+    }
+
+
+
+
+
+
+
+    .section{
+
+
+        padding:18px;
+
+
+    }
+
+
+
+
+
+
+
+    .chart-container{
+
+
+        height:250px;
+
+
+    }
+
+
+
+
+
+
+
+    .coin-row{
+
+
+        flex-direction:column;
+
+
+        align-items:flex-start;
+
+
+        gap:10px;
+
+
+    }
+
+
+
+
+
+
+
+    .coin-data{
+
+
+        text-align:left;
+
+
+    }
+
+
+
+
+
+
+
+    .converter-box{
+
+
+        flex-direction:column;
+
+
+        align-items:stretch;
+
+
+    }
+
+
+
+
+
+
+
+    .converter-box input,
+    .converter-box button{
+
+
+        width:100%;
+
+
+    }
+
+
 
 }
 
 
-.header nav{
 
-flex-wrap:wrap;
 
-justify-content:center;
 
-gap:15px;
 
-}
 
+/* ==========================
+   SMALL MOBILE
+========================== */
 
 
-.hero{
+@media(max-width:400px){
 
-padding:30px 20px;
 
-text-align:center;
 
-}
+    .hero h1{
 
 
+        font-size:26px;
 
-.hero h1{
 
-font-size:2rem;
+    }
 
-}
 
 
+    .market-card p{
 
-.hero p{
 
-font-size:14px;
+        font-size:22px;
 
-}
 
+    }
 
 
-.search-box{
 
-flex-direction:column;
+    .widget h2,
+    .section h2{
 
-}
 
+        font-size:20px;
 
 
-.search-box button{
+    }
 
-width:100%;
 
-}
-
-
-
-.overview-grid{
-
-grid-template-columns:1fr;
-
-}
-
-
-
-.widgets{
-
-grid-template-columns:1fr;
-
-}
-
-
-
-.chart-card{
-
-padding:15px;
-
-}
-
-
-
-.converter-box{
-
-flex-direction:column;
-
-}
-
-
-
-.converter button{
-
-width:100%;
-
-}
-
-
-
-.footer{
-
-flex-direction:column;
-
-text-align:center;
-
-gap:20px;
-
-}
-
-
-
-.about-card{
-
-padding:25px;
-
-}
-
-
-
-}
-
-
-
-/* =========================
- SMALL MOBILE
-========================= */
-
-@media(max-width:480px){
-
-
-.dashboard{
-
-width:95%;
-
-}
-
-
-.hero h1{
-
-font-size:1.7rem;
-
-}
-
-
-
-.card,
-.widget,
-.overview-card{
-
-padding:20px;
-
-}
-
-
-
-.price{
-
-font-size:1.5rem;
-
-}
-
-
-
-.header nav a{
-
-font-size:14px;
-
-}
 
 }

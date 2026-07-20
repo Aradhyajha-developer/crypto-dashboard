@@ -1,185 +1,693 @@
 import {
-  fetchMarketOverview,
-  fetchTopGainers,
-  fetchTopLosers
+    searchCoin,
+    fetchCoin,
+    fetchHistory
 } from "./api.js";
 
+
 import {
-  formatCurrency,
-  formatNumber,
-  formatPercent,
-  showError
+    saveFavorite,
+    removeFavorite,
+    getFavorites,
+    isFavorite
+} from "./storage.js";
+
+
+import {
+    createChart,
+    destroyChart
+} from "./chart.js";
+
+
+import {
+    loadMarketWidgets
+} from "./market.js";
+
+
+import {
+    initializeConverter
+} from "./converter.js";
+
+
+import {
+    initializeTheme
+} from "./theme.js";
+
+
+import {
+    showLoader,
+    hideLoader
+} from "./loader.js";
+
+
+import {
+    formatCurrency,
+    formatPercent,
+    debounce,
+    showError
 } from "./utils.js";
 
-/* ---------------- Helpers ---------------- */
 
-function setText(id, value) {
-  const el = document.getElementById(id);
 
-  if (el) {
-    el.textContent = value;
-  }
+/*
+==============================
+DOM
+==============================
+*/
+
+
+const searchInput =
+document.getElementById("search");
+
+
+const searchBtn =
+document.getElementById("searchBtn");
+
+
+const suggestions =
+document.getElementById("suggestions");
+
+
+const results =
+document.getElementById("results");
+
+
+const favList =
+document.getElementById("favList");
+
+
+
+let currentCoin = null;
+
+
+
+
+
+/*
+==============================
+APP START
+==============================
+*/
+
+
+async function initDashboard(){
+
+    try{
+
+
+        initializeTheme();
+
+
+        await loadMarketWidgets();
+
+
+        initializeConverter();
+
+
+        renderFavorites();
+
+
+        setupSearch();
+
+
+        await restoreLastCoin();
+
+
+
+    }
+    catch(error){
+
+        console.error(
+            "Dashboard Error:",
+            error
+        );
+
+    }
+
+
 }
 
-/* ---------------- Market Overview ---------------- */
 
-export async function loadMarketOverview() {
 
-  try {
 
-    const market = await fetchMarketOverview();
 
-    setText(
-      "marketCap",
-      formatCurrency(market.total_market_cap.usd)
+
+
+/*
+==============================
+SEARCH
+==============================
+*/
+
+
+function setupSearch(){
+
+
+    if(!searchInput)
+    return;
+
+
+
+
+    searchInput.addEventListener(
+
+        "input",
+
+        debounce(async(e)=>{
+
+
+            const value =
+            e.target.value.trim();
+
+
+
+            if(!value){
+
+                suggestions.innerHTML="";
+
+                return;
+
+            }
+
+
+
+            const data =
+            await searchCoin(value);
+
+
+
+            suggestions.innerHTML="";
+
+
+
+            (data.coins || [])
+            .slice(0,5)
+            .forEach(coin=>{
+
+
+                const item =
+                document.createElement("div");
+
+
+
+                item.className =
+                "suggestion-item";
+
+
+
+                item.innerHTML = `
+
+                <img
+                src="${coin.thumb}"
+                width="25"
+                >
+
+                ${coin.name}
+                (${coin.symbol.toUpperCase()})
+
+                `;
+
+
+
+                item.onclick=()=>{
+
+                    loadCoin(
+                        coin.id
+                    );
+
+
+                    suggestions.innerHTML="";
+
+                };
+
+
+
+                suggestions.appendChild(item);
+
+
+            });
+
+
+
+        },400)
+
     );
 
-    setText(
-      "marketVolume",
-      formatCurrency(market.total_volume.usd)
-    );
 
-    setText(
-      "btcDom",
-      formatPercent(market.market_cap_percentage.btc)
-    );
 
-    setText(
-      "ethDom",
-      formatPercent(market.market_cap_percentage.eth)
-    );
 
-  } catch (error) {
 
-    console.error(error);
+    if(searchBtn){
 
-    setText("marketCap", "--");
-    setText("marketVolume", "--");
-    setText("btcDom", "--");
-    setText("ethDom", "--");
 
-  }
+        searchBtn.onclick=()=>{
+
+
+            const value =
+            searchInput.value.trim();
+
+
+
+            if(value){
+
+                loadCoin(value.toLowerCase());
+
+            }
+
+
+        };
+
+
+    }
+
+
 
 }
 
-/* ---------------- Render Coin List ---------------- */
 
-function renderCoins(elementId, coins) {
 
-  const list = document.getElementById(elementId);
 
-  if (!list) return;
 
-  list.innerHTML = "";
 
-  coins.forEach((coin) => {
 
-    const li = document.createElement("li");
 
-    const change =
-      Number(coin.price_change_percentage_24h || 0);
+/*
+==============================
+LOAD COIN
+==============================
+*/
 
-    li.innerHTML = `
-      <div class="coin-row">
 
-        <div class="coin-info">
+async function loadCoin(id){
 
-          <img
-            src="${coin.image}"
-            alt="${coin.name}"
-            width="28"
-            height="28"
-          >
 
-          <span>${coin.name}</span>
+    try{
 
-        </div>
 
-        <div class="coin-price">
+        showLoader();
 
-          <strong>
-            ${formatCurrency(coin.current_price)}
-          </strong>
 
-          <small
-            style="
-              color:${change >= 0 ? "#16a34a" : "#dc2626"};
-              display:block;
-            "
-          >
-            ${change >= 0 ? "+" : ""}
-            ${change.toFixed(2)}%
-          </small>
 
-        </div>
+        const coin =
+        await fetchCoin(id);
 
-      </div>
+
+
+        currentCoin = coin;
+
+
+
+        localStorage.setItem(
+            "lastCoin",
+            coin.id
+        );
+
+
+
+        renderCoin(coin);
+
+
+
+        const history =
+        await fetchHistory(
+            coin.id
+        );
+
+
+
+        createChart(
+            "priceChart",
+            history
+        );
+
+
+
+        hideLoader();
+
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+            error
+        );
+
+
+        hideLoader();
+
+
+
+        showError(
+            results,
+            "Unable to load coin."
+        );
+
+
+
+        destroyChart();
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+/*
+==============================
+RENDER COIN
+==============================
+*/
+
+
+function renderCoin(coin){
+
+
+    const market =
+    coin.market_data;
+
+
+
+    const favorite =
+    isFavorite(
+        coin.id
+    );
+
+
+
+    results.innerHTML = `
+
+
+    <div class="coin-card">
+
+
+        <img
+
+        src="${coin.image.large}"
+
+        width="80"
+
+        >
+
+
+        <h2>
+
+        ${coin.name}
+        (${coin.symbol.toUpperCase()})
+
+        </h2>
+
+
+        <h1>
+
+        ${formatCurrency(
+            market.current_price.usd
+        )}
+
+        </h1>
+
+
+
+        <p>
+
+        ${
+        formatPercent(
+        market.price_change_percentage_24h
+        )
+        }
+
+        </p>
+
+
+
+
+        <button id="favoriteBtn">
+
+
+        ${
+        favorite
+        ?
+        "⭐ Remove Favorite"
+        :
+        "☆ Add Favorite"
+        }
+
+
+        </button>
+
+
+
+    </div>
+
+
+
     `;
 
-    list.appendChild(li);
 
-  });
 
-}
-
-/* ---------------- Top Gainers ---------------- */
-
-export async function loadTopGainers() {
-
-  try {
-
-    const coins = await fetchTopGainers();
-
-    renderCoins("gainers", coins);
-
-  } catch (error) {
-
-    console.error(error);
-
-    showError(
-      document.getElementById("gainers"),
-      "Unable to load gainers."
+    setupFavorite(
+        coin.id
     );
 
-  }
 
 }
 
-/* ---------------- Top Losers ---------------- */
 
-export async function loadTopLosers() {
 
-  try {
 
-    const coins = await fetchTopLosers();
 
-    renderCoins("losers", coins);
 
-  } catch (error) {
 
-    console.error(error);
 
-    showError(
-      document.getElementById("losers"),
-      "Unable to load losers."
+/*
+==============================
+FAVORITE
+==============================
+*/
+
+
+function setupFavorite(id){
+
+
+    const btn =
+    document.getElementById(
+        "favoriteBtn"
     );
 
-  }
+
+
+    if(!btn)
+    return;
+
+
+
+    btn.onclick=()=>{
+
+
+        if(isFavorite(id)){
+
+
+            removeFavorite(id);
+
+
+        }
+        else{
+
+
+            saveFavorite(id);
+
+
+        }
+
+
+
+        renderFavorites();
+
+
+
+        if(currentCoin){
+
+            renderCoin(
+                currentCoin
+            );
+
+        }
+
+
+
+    };
+
 
 }
 
-/* ---------------- Initialize Widgets ---------------- */
 
-export async function loadMarketWidgets() {
 
-  await Promise.all([
 
-    loadMarketOverview(),
 
-    loadTopGainers(),
 
-    loadTopLosers()
 
-  ]);
+
+/*
+==============================
+FAVORITES
+==============================
+*/
+
+
+async function renderFavorites(){
+
+
+    if(!favList)
+    return;
+
+
+
+    const favorites =
+    getFavorites();
+
+
+
+    if(favorites.length===0){
+
+
+        favList.innerHTML = `
+
+        <li>
+        No favorites yet ⭐
+        </li>
+
+        `;
+
+
+        return;
+
+    }
+
+
+
+
+
+    favList.innerHTML="";
+
+
+
+
+    for(
+        const id of favorites
+    ){
+
+
+        try{
+
+
+            const coin =
+            await fetchCoin(id);
+
+
+
+            const li =
+            document.createElement("li");
+
+
+
+            li.innerHTML = `
+
+            ${coin.name}
+
+            -
+
+            ${formatCurrency(
+            coin.market_data.current_price.usd
+            )}
+
+
+            <button data-id="${id}">
+            ❌
+            </button>
+
+
+            `;
+
+
+
+            favList.appendChild(li);
+
+
+
+        }
+        catch(error){
+
+            console.log(error);
+
+        }
+
+
+    }
+
 
 }
+
+
+
+
+
+
+
+
+/*
+==============================
+RESTORE
+==============================
+*/
+
+
+async function restoreLastCoin(){
+
+
+    const last =
+    localStorage.getItem(
+        "lastCoin"
+    );
+
+
+
+    await loadCoin(
+        last || "bitcoin"
+    );
+
+
+}
+
+
+
+
+
+
+
+/*
+==============================
+START
+==============================
+*/
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+    initDashboard();
+
+}
+
+);
