@@ -1,70 +1,107 @@
-import {
-  getTheme,
-  saveTheme
-} from "./storage.js";
+let initialized = false;
 
-const DARK_CLASS = "dark";
 
-/* ---------------- Apply Theme ---------------- */
+export function initializeTheme(){
 
-export function applyTheme(theme) {
 
-  if (theme === "dark") {
+    if(initialized){
 
-    document.body.classList.add(DARK_CLASS);
+        return;
 
-  } else {
+    }
 
-    document.body.classList.remove(DARK_CLASS);
 
-  }
+    initialized = true;
 
-  updateThemeButton(theme);
 
-}
 
-/* ---------------- Update Button ---------------- */
-
-export function updateThemeButton(theme) {
-
-  const button = document.getElementById("themeBtn");
-
-  if (!button) return;
-
-  button.textContent =
-    theme === "dark" ? "☀️" : "🌙";
-
-}
-
-/* ---------------- Toggle ---------------- */
-
-export function toggleTheme() {
-
-  const isDark =
-    document.body.classList.contains(DARK_CLASS);
-
-  const nextTheme =
-    isDark ? "light" : "dark";
-
-  applyTheme(nextTheme);
-
-  saveTheme(nextTheme);
-
-}
-
-/* ---------------- Initialize ---------------- */
-
-export function initializeTheme() {
-
-  const savedTheme = getTheme();
-
-  applyTheme(savedTheme);
-
-  const button =
+    const themeBtn =
     document.getElementById("themeBtn");
 
-  if (!button) return;
 
-  button.addEventListener("click", toggleTheme);
+
+    const savedTheme =
+    localStorage.getItem("theme");
+
+
+
+    if(savedTheme === "dark"){
+
+        document.body.classList.add("dark");
+
+    }
+
+
+
+    if(!themeBtn){
+
+        console.log(
+            "Theme button not found"
+        );
+
+        return;
+
+    }
+
+
+
+
+    themeBtn.addEventListener(
+
+        "click",
+
+        ()=>{
+
+
+            document.body.classList.toggle(
+                "dark"
+            );
+
+
+
+            const isDark =
+            document.body.classList.contains(
+                "dark"
+            );
+
+
+
+            localStorage.setItem(
+
+                "theme",
+
+                isDark
+                ?
+                "dark"
+                :
+                "light"
+
+            );
+
+
+
+            themeBtn.textContent =
+            isDark
+            ?
+            "☀️"
+            :
+            "🌙";
+
+
+        }
+
+    );
+
+
+
+    // Initial icon update
+
+    themeBtn.textContent =
+    document.body.classList.contains("dark")
+    ?
+    "☀️"
+    :
+    "🌙";
+
 
 }

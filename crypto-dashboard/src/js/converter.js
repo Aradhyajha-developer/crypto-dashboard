@@ -1,94 +1,91 @@
-import { fetchUsdRate } from "./api.js";
+import {
+    fetchUsdRate
+} from "./api.js";
 
-let exchangeRate = null;
 
-/* ---------------- Fetch Exchange Rate ---------------- */
+let usdRate = 83;
 
-export async function loadExchangeRate() {
-  try {
-    exchangeRate = await fetchUsdRate();
 
-    if (!exchangeRate || exchangeRate <= 0) {
-      exchangeRate = 87; // fallback
-    }
 
-    return exchangeRate;
+export async function initializeConverter(){
 
-  } catch (error) {
+    const input =
+    document.getElementById("usd");
 
-    console.error("Exchange Rate Error:", error);
 
-    exchangeRate = 87; // fallback
+    const button =
+    document.getElementById("convertBtn");
 
-    return exchangeRate;
-  }
-}
 
-/* ---------------- Convert ---------------- */
+    const result =
+    document.getElementById("inrResult");
 
-export function convertUsdToInr(usd) {
 
-  if (exchangeRate === null) {
-    return 0;
-  }
 
-  return usd * exchangeRate;
-}
+    if(!input || !button || !result){
 
-/* ---------------- Format INR ---------------- */
-
-export function formatInr(value) {
-
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 2
-  }).format(value);
-
-}
-
-/* ---------------- Initialize Converter ---------------- */
-
-export async function initializeConverter() {
-
-  const usdInput = document.getElementById("usd");
-
-  const convertBtn = document.getElementById("convertBtn");
-
-  const result = document.getElementById("inrResult");
-
-  if (!usdInput || !convertBtn || !result) return;
-
-  await loadExchangeRate();
-
-  function convert() {
-
-    const usd = Number(usdInput.value);
-
-    if (!usd || usd < 0) {
-
-      result.textContent = "Enter a valid amount";
-
-      return;
+        return;
 
     }
 
-    const inr = convertUsdToInr(usd);
 
-    result.textContent = formatInr(inr);
 
-  }
+    try{
 
-  convertBtn.addEventListener("click", convert);
+        usdRate =
+        await fetchUsdRate();
 
-  usdInput.addEventListener("keypress", (e) => {
+    }
+    catch(error){
 
-    if (e.key === "Enter") {
-
-      convert();
+        console.log(
+            "Using fallback rate"
+        );
 
     }
 
-  });
+
+
+
+    button.addEventListener(
+        "click",
+        ()=>{
+
+
+            const usd =
+            Number(input.value);
+
+
+
+            if(!usd || usd <=0){
+
+                result.textContent =
+                "Enter valid USD";
+
+                return;
+
+            }
+
+
+
+            const inr =
+            usd * usdRate;
+
+
+
+            result.textContent =
+            "₹ " +
+            inr.toLocaleString(
+                "en-IN",
+                {
+                    maximumFractionDigits:2
+                }
+            );
+
+
+        }
+
+    );
+
 
 }

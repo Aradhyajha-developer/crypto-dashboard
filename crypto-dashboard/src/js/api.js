@@ -403,3 +403,12 @@ export async function checkAPI(){
     }
 
 }
+/* ==========================
+   USD RATE COMPATIBILITY
+========================== */
+
+export async function fetchUsdRate(){
+
+    return await fetchUSDtoINR();
+
+}

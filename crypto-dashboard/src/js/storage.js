@@ -1,127 +1,62 @@
-const FAVORITES = "cryptodash-favorites";
+const KEY = "favorites";
 
-const THEME = "cryptodash-theme";
 
-/* ---------------- Favorites ---------------- */
 
-export function getFavorites() {
+export function getFavorites(){
 
     return JSON.parse(
-
-localStorage.getItem(FAVORITES)
-
+        localStorage.getItem(KEY)
     ) || [];
 
 }
 
-export function saveFavorite(id) {
 
-    const favs = getFavorites();
 
-    if (!favs.includes(id)) {
+export function saveFavorite(id){
 
-        favs.push(id);
+    const favorites =
+    getFavorites();
+
+
+    if(!favorites.includes(id)){
+
+        favorites.push(id);
 
     }
 
+
     localStorage.setItem(
-
-FAVORITES,
-
-JSON.stringify(favs)
-
+        KEY,
+        JSON.stringify(favorites)
     );
 
 }
 
-export function removeFavorite(id) {
 
-    const favs = getFavorites()
 
-        .filter(
 
-coin => coin !== id
+export function removeFavorite(id){
 
-        );
+    const favorites =
+    getFavorites()
+    .filter(
+        coin => coin !== id
+    );
+
 
     localStorage.setItem(
-
-FAVORITES,
-
-JSON.stringify(favs)
-
+        KEY,
+        JSON.stringify(favorites)
     );
 
 }
 
-export function isFavorite(id) {
+
+
+
+export function isFavorite(id){
 
     return getFavorites()
-
-        .includes(id);
-
-}
-
-/* ---------------- Theme ---------------- */
-
-export function saveTheme(theme) {
-
-    localStorage.setItem(
-
-THEME,
-
-theme
-
-    );
-
-}
-
-export function getTheme() {
-
-    return (
-
-localStorage.getItem(THEME)
-
-|| "light"
-
-    );
-
-}
-
-/* ---------------- Generic Cache ---------------- */
-
-export function cacheData(key, value) {
-
-    localStorage.setItem(
-
-key,
-
-JSON.stringify(value)
-
-    );
-
-}
-
-export function getCache(key) {
-
-    const data =
-
-localStorage.getItem(key);
-
-    if (!data) return null;
-
-    return JSON.parse(data);
-
-}
-
-export function clearCache(key) {
-
-    localStorage.removeItem(key);
-
-}
-
-export function clearAllCache() {
-
-    localStorage.clear();
+    .includes(id);
 
 }

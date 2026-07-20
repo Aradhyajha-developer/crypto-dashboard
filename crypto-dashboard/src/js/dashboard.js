@@ -1,60 +1,52 @@
 ﻿import {
-  searchCoin,
-  fetchCoin,
-  fetchHistory
+    searchCoin,
+    fetchCoin,
+    fetchHistory
 } from "./api.js";
 
 
 import {
-  saveFavorite,
-  removeFavorite,
-  getFavorites,
-  isFavorite
+    saveFavorite,
+    removeFavorite,
+    getFavorites,
+    isFavorite
 } from "./storage.js";
 
 
 import {
-  createChart,
-  destroyChart
+    createChart,
+    destroyChart
 } from "./chart.js";
 
 
 import {
-  loadMarketWidgets
+    loadMarketWidgets
 } from "./market.js";
 
 
 import {
-  initializeConverter
+    initializeConverter
 } from "./converter.js";
 
 
 import {
-  initializeTheme
+    initializeTheme
 } from "./theme.js";
 
 
 import {
-  showLoader,
-  hideLoader
+    showLoader,
+    hideLoader
 } from "./loader.js";
 
 
 import {
-  formatCurrency,
-  formatNumber,
-  formatPercent,
-  debounce,
-  showError
+    formatCurrency,
+    formatPercent,
+    debounce,
+    showError
 } from "./utils.js";
 
-
-
-/*
---------------------------------
-DOM ELEMENTS
---------------------------------
-*/
 
 
 const searchInput =
@@ -77,25 +69,19 @@ const favList =
 document.getElementById("favList");
 
 
-const chartCanvas =
-document.getElementById("priceChart");
-
-
 
 let currentCoin = null;
 
 
 
-/*
---------------------------------
-INITIALIZE APP
---------------------------------
-*/
+
+/* ==========================
+   INIT
+========================== */
 
 
-async function initDashboard(){
+export async function initDashboard(){
 
-  try{
 
     initializeTheme();
 
@@ -106,1126 +92,670 @@ async function initDashboard(){
     await initializeConverter();
 
 
-    renderFavorites();
-
-
     setupSearch();
 
 
-  }
-  catch(error){
+    await renderFavorites();
 
-    console.error(
-      "Dashboard Error:",
-      error
-    );
 
-  }
+    await restoreLastCoin();
+
 
 }
 
 
 
-/*
---------------------------------
-SEARCH EVENTS
---------------------------------
-*/
+
+
+/* ==========================
+   SEARCH
+========================== */
 
 
 function setupSearch(){
 
 
-if(!searchInput)
-return;
+    if(!searchInput)
+    return;
 
 
 
-searchInput.addEventListener(
-"input",
+    searchInput.addEventListener(
 
-debounce(async(e)=>{
+        "input",
 
+        debounce(
 
-const value =
-e.target.value.trim();
-
+            async(e)=>{
 
 
-if(!value){
+                const value =
+                e.target.value.trim();
 
-suggestions.innerHTML="";
 
-return;
+
+                if(!value){
+
+                    suggestions.innerHTML="";
+
+                    return;
+
+                }
+
+
+
+                await showSuggestions(value);
+
+
+            },
+
+            400
+
+        )
+
+    );
+
+
+
+
+
+    searchBtn?.addEventListener(
+
+        "click",
+
+        ()=>{
+
+
+            const value =
+            searchInput.value.trim();
+
+
+
+            if(value){
+
+                loadCoin(value.toLowerCase());
+
+                suggestions.innerHTML="";
+
+            }
+
+
+        }
+
+    );
+
+
+
+
+
+    searchInput.addEventListener(
+
+        "keypress",
+
+        (e)=>{
+
+
+            if(e.key==="Enter"){
+
+
+                const value =
+                searchInput.value.trim();
+
+
+
+                if(value){
+
+                    loadCoin(value.toLowerCase());
+
+                    suggestions.innerHTML="";
+
+                }
+
+
+            }
+
+
+        }
+
+    );
+
 
 }
 
 
 
-await showSuggestions(value);
 
 
 
-},400)
-
-);
-
-
-
-if(searchBtn){
-
-searchBtn.addEventListener(
-"click",
-
-()=>{
-
-const value =
-searchInput.value.trim();
-
-
-if(value){
-
-loadCoin(value);
-
-}
-
-
-}
-
-);
-
-}
-
-
-
-searchInput.addEventListener(
-"keypress",
-
-(e)=>{
-
-
-if(e.key==="Enter"){
-
-
-const value =
-searchInput.value.trim();
-
-
-
-if(value){
-
-loadCoin(value);
-
-}
-
-
-}
-
-
-}
-
-);
-
-
-}
-
-
-
-/*
---------------------------------
-SEARCH SUGGESTIONS
---------------------------------
-*/
+/* ==========================
+   SUGGESTIONS
+========================== */
 
 
 async function showSuggestions(query){
 
 
-try{
+    try{
 
 
-const coins =
-await searchCoin(query);
-
-
-
-suggestions.innerHTML="";
+        const data =
+        await searchCoin(query);
 
 
 
-coins.slice(0,5)
-.forEach(coin=>{
-
-
-const item =
-document.createElement("div");
+        suggestions.innerHTML="";
 
 
 
-item.innerHTML=`
+        data.coins
+        .slice(0,5)
+        .forEach(coin=>{
 
-<img 
-src="${coin.thumb}"
-width="25"
-/>
 
-${coin.name}
-(${coin.symbol.toUpperCase()})
-
-`;
+            const div =
+            document.createElement("div");
 
 
 
-item.onclick=()=>{
-
-
-loadCoin(
-coin.id
-);
-
-
-suggestions.innerHTML="";
-
-
-};
+            div.className =
+            "suggestion-item";
 
 
 
-suggestions.appendChild(item);
+            div.innerHTML = `
+
+            <img src="${coin.thumb}" width="25">
+
+            <span>
+            ${coin.name}
+            (${coin.symbol.toUpperCase()})
+            </span>
+
+            `;
 
 
 
-});
+            div.onclick = ()=>{
 
+
+                searchInput.value =
+                coin.name;
+
+
+
+                loadCoin(
+                    coin.id
+                );
+
+
+
+                suggestions.innerHTML="";
+
+
+            };
+
+
+
+            suggestions.appendChild(div);
+
+
+
+        });
+
+
+
+    }
+
+    catch(error){
+
+        console.log(error);
+
+    }
 
 
 }
 
-catch(error){
-
-console.log(error);
-
-}
 
 
-}
-/*
---------------------------------
-LOAD COIN DATA
---------------------------------
-*/
+
+
+
+/* ==========================
+   LOAD COIN
+========================== */
+
 
 async function loadCoin(id){
 
 
-try{
+    try{
 
 
-showLoader();
-
-
-
-const coin =
-await fetchCoin(id);
+        showLoader();
 
 
 
-currentCoin = coin;
+        const coin =
+        await fetchCoin(id);
 
 
 
-renderCoin(
-coin
-);
+        currentCoin =
+        coin;
 
 
 
-await loadChart(
-coin.id,
-coin.name
-);
+        localStorage.setItem(
+            "lastCoin",
+            coin.id
+        );
 
 
 
-hideLoader();
+        renderCoin(
+            coin
+        );
 
+
+
+        await loadChart(
+            coin.id
+        );
+
+
+
+        hideLoader();
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+            error
+        );
+
+
+        hideLoader();
+
+
+
+        showError(
+            results,
+            "Coin load failed"
+        );
+
+
+    }
 
 
 }
 
-catch(error){
-
-
-console.error(
-"Coin Loading Error:",
-error
-);
 
 
 
-hideLoader();
 
 
-
-showError(
-results,
-"Unable to load coin data. Try another search."
-);
-
-
-
-}
-
-}
-
-
-
-/*
---------------------------------
-RENDER COIN DETAILS
---------------------------------
-*/
+/* ==========================
+   RENDER COIN
+========================== */
 
 
 function renderCoin(coin){
 
 
-const market =
-coin.market_data;
+    const market =
+    coin.market_data;
 
 
 
-const favorite =
-isFavorite(
-coin.id
-);
+    results.innerHTML = `
 
+    <div class="card coin-card">
 
 
-results.innerHTML = `
+        <img 
+        src="${coin.image.large}"
+        width="80"
+        >
 
-<div class="card coin-card">
 
+        <h2>
+        ${coin.name}
+        (${coin.symbol.toUpperCase()})
+        </h2>
 
-<img
 
-src="${coin.image.large}"
 
-alt="${coin.name}"
+        <h1>
+        ${formatCurrency(
+            market.current_price.usd
+        )}
+        </h1>
 
->
 
 
-<h2>
+        <p class="${
+            market.price_change_percentage_24h >= 0
+            ?
+            "positive"
+            :
+            "negative"
+        }">
 
-${coin.name}
+        ${formatPercent(
+            market.price_change_percentage_24h
+        )}
 
-(${coin.symbol.toUpperCase()})
+        </p>
 
-</h2>
 
 
+        <button id="favoriteBtn">
 
-<div class="price">
+        ${
+            isFavorite(coin.id)
+            ?
+            "⭐ Remove Favorite"
+            :
+            "☆ Add Favorite"
+        }
 
-${formatCurrency(
-market.current_price.usd
-)}
+        </button>
 
-</div>
 
+    </div>
 
+    `;
 
-<div class="change 
-${market.price_change_percentage_24h >=0
-? "positive"
-:"negative"}">
 
 
-${formatPercent(
-market.price_change_percentage_24h
-)}
 
-</div>
+    document
+    .getElementById("favoriteBtn")
+    ?.addEventListener(
 
+        "click",
 
+        ()=>{
 
 
-<div class="coin-info-grid">
+            if(
+                isFavorite(coin.id)
+            ){
 
+                removeFavorite(
+                    coin.id
+                );
 
-<div>
 
-<h4>
-Market Cap
-</h4>
+            }
+            else{
 
-<p>
 
-${formatCurrency(
-market.market_cap.usd
-)}
+                saveFavorite(
+                    coin.id
+                );
 
-</p>
 
-</div>
+            }
 
 
 
+            renderCoin(
+                coin
+            );
 
-<div>
 
-<h4>
-Volume
-</h4>
+            renderFavorites();
 
-<p>
 
-${formatCurrency(
-market.total_volume.usd
-)}
+        }
 
-</p>
-
-</div>
-
-
-
-
-<div>
-
-<h4>
-Rank
-</h4>
-
-<p>
-
-#${coin.market_cap_rank}
-
-</p>
-
-</div>
-
-
-</div>
-
-
-
-
-<button id="favoriteBtn">
-
-
-${favorite
-?"⭐ Remove Favorite"
-:"☆ Add Favorite"}
-
-</button>
-
-
-
-</div>
-
-`;
-
-
-
-setupFavoriteButton(
-coin.id
-);
-
+    );
 
 
 }
 
 
 
-/*
---------------------------------
-FAVORITE BUTTON
---------------------------------
-*/
-
-
-function setupFavoriteButton(id){
-
-
-const btn =
-document.getElementById(
-"favoriteBtn"
-);
 
 
 
-if(!btn)
-return;
+
+/* ==========================
+   CHART
+========================== */
+
+
+async function loadChart(id){
+
+
+    try{
+
+
+        destroyChart();
 
 
 
-btn.addEventListener(
-"click",
-
-()=>{
-
-
-if(isFavorite(id)){
-
-
-removeFavorite(id);
+        const history =
+        await fetchHistory(id);
 
 
 
-}
-
-else{
-
-
-saveFavorite(id);
+        createChart(
+            "priceChart",
+            history
+        );
 
 
-
-}
-
+    }
 
 
-renderFavorites();
+    catch(error){
 
 
-
-if(currentCoin){
-
-renderCoin(
-currentCoin
-);
-
-}
+        console.log(
+            "Chart error",
+            error
+        );
 
 
-}
+        destroyChart();
 
-);
+
+    }
 
 
 }
 
 
 
-/*
---------------------------------
-LOAD CHART
---------------------------------
-*/
-
-
-async function loadChart(
-id,
-name
-){
-
-
-try{
-
-
-const history =
-await fetchHistory(id);
 
 
 
-if(chartCanvas){
 
+/* ==========================
+   FAVORITES
+========================== */
 
-createChart(
-
-chartCanvas,
-
-history,
-
-name
-
-);
-
-
-}
-
-
-}
-
-catch(error){
-
-
-console.error(
-"Chart Error",
-error
-);
-
-
-destroyChart();
-
-
-}
-
-}
-/*
---------------------------------
-RENDER FAVORITES
---------------------------------
-*/
 
 async function renderFavorites(){
 
-const favorites =
-getFavorites();
+
+    if(!favList)
+    return;
 
 
 
-if(!favList)
-return;
+    const favorites =
+    getFavorites();
 
 
 
-if(
-favorites.length === 0
-){
-
-favList.innerHTML = `
-
-<li>
-No favorites added yet ⭐
-</li>
-
-`;
-
-return;
-
-}
+    favList.innerHTML="";
 
 
 
-favList.innerHTML="";
+    if(
+        favorites.length===0
+    ){
+
+
+        favList.innerHTML =
+        "<li>No favorites yet ⭐</li>";
+
+        return;
+
+
+    }
 
 
 
-favorites.forEach(
-async(id)=>{
+
+    for(
+        const id of favorites
+    ){
 
 
-try{
+        try{
 
 
-const coin =
-await fetchCoin(id);
-
-
-
-const li =
-document.createElement("li");
+            const coin =
+            await fetchCoin(id);
 
 
 
-li.className =
-"favorite-item";
+            const li =
+            document.createElement("li");
 
 
 
-li.innerHTML = `
-
-<div class="favorite-left">
+            li.innerHTML = `
 
 
-<img
+            <span>
 
-src="${coin.image.small}"
+            ${coin.name}
 
-width="30"
-
->
+            </span>
 
 
-<span>
+            <strong>
 
-${coin.name}
+            ${formatCurrency(
+                coin.market_data.current_price.usd
+            )}
 
-</span>
-
-
-</div>
-
+            </strong>
 
 
-<div class="favorite-right">
+            <button
+            class="remove-fav"
+            data-id="${id}"
+            >
+
+            ❌
+
+            </button>
 
 
-<strong>
-
-${formatCurrency(
-coin.market_data.current_price.usd
-)}
-
-</strong>
+            `;
 
 
 
-<button
-class="remove-fav"
-data-id="${coin.id}"
->
-
-❌
-
-</button>
+            favList.appendChild(
+                li
+            );
 
 
-</div>
+        }
 
-`;
+        catch(error){
+
+            console.log(error);
+
+        }
 
 
-
-favList.appendChild(li);
-
+    }
 
 
 }
 
-catch(error){
 
 
-console.log(
-"Favorite error",
-error
-);
 
 
-}
 
+favList?.addEventListener(
 
-}
+    "click",
 
-);
+    (e)=>{
 
 
+        if(
+            e.target.classList.contains(
+                "remove-fav"
+            )
+        ){
 
-}
 
+            removeFavorite(
+                e.target.dataset.id
+            );
 
-/*
---------------------------------
-REMOVE FAVORITE EVENT
---------------------------------
-*/
 
 
-if(favList){
+            renderFavorites();
 
 
-favList.addEventListener(
-"click",
+        }
 
-(e)=>{
 
-
-if(
-e.target.classList.contains(
-"remove-fav"
-)
-
-){
-
-
-const id =
-e.target.dataset.id;
-
-
-
-removeFavorite(id);
-
-
-
-renderFavorites();
-
-
-}
-
-
-
-}
-
-);
-
-
-}
-
-
-
-/*
---------------------------------
-LOAD DEFAULT COIN
---------------------------------
-*/
-
-
-async function loadDefaultCoin(){
-
-
-try{
-
-
-await loadCoin(
-"bitcoin"
-);
-
-
-}
-
-catch(error){
-
-
-console.log(error);
-
-
-}
-
-
-}
-
-
-
-/*
---------------------------------
-START APPLICATION
---------------------------------
-*/
-
-
-document.addEventListener(
-"DOMContentLoaded",
-
-()=>{
-
-
-initDashboard();
-
-
-
-loadDefaultCoin();
-
-
-
-}
-
-);
-/*
---------------------------------
-SEARCH VALIDATION
---------------------------------
-*/
-
-function validateSearch(value){
-
-  if(!value || value.trim()===""){
-
-    showError(
-      results,
-      "Please enter a coin name."
-    );
-
-    return false;
-
-  }
-
-  return true;
-
-}
-
-
-
-/*
---------------------------------
-IMPROVED SEARCH BUTTON
---------------------------------
-*/
-
-
-if(searchBtn){
-
-
-searchBtn.addEventListener(
-
-"click",
-
-()=>{
-
-
-const value =
-searchInput.value;
-
-
-
-if(
-validateSearch(value)
-){
-
-loadCoin(value.toLowerCase());
-
-}
-
-
-}
-
-);
-
-
-}
-
-
-
-/*
---------------------------------
-NETWORK STATUS
---------------------------------
-*/
-
-
-function checkNetwork(){
-
-
-if(!navigator.onLine){
-
-
-showError(
-
-results,
-
-"No internet connection. Please check your network."
-
-);
-
-
-return false;
-
-
-}
-
-
-return true;
-
-
-}
-
-
-
-window.addEventListener(
-
-"offline",
-
-()=>{
-
-
-showError(
-
-results,
-
-"You are offline."
-
-);
-
-
-}
-
-);
-
-
-
-window.addEventListener(
-
-"online",
-
-()=>{
-
-
-console.log(
-"Connection restored"
-);
-
-
-}
+    }
 
 );
 
 
 
 
-/*
---------------------------------
-SAFE API CALL
---------------------------------
-*/
-
-
-async function safeFetch(callback){
-
-
-try{
-
-
-if(
-!checkNetwork()
-){
-
-return null;
-
-}
-
-
-return await callback();
 
 
 
-}
-
-catch(error){
-
-
-console.error(
-error
-);
-
-
-
-throw error;
-
-
-}
-
-
-}
-
-
-
-
-/*
---------------------------------
-CACHE CURRENT COIN
---------------------------------
-*/
-
-
-function saveLastCoin(coin){
-
-
-try{
-
-
-localStorage.setItem(
-
-"lastCoin",
-
-coin
-
-);
-
-
-}
-
-catch(error){
-
-
-console.log(
-"Cache error"
-);
-
-
-}
-
-
-}
-
-
-
-
-function getLastCoin(){
-
-
-return localStorage.getItem(
-"lastCoin"
-);
-
-
-}
-
-
-
-
-/*
---------------------------------
-AUTO RESTORE LAST SEARCH
---------------------------------
-*/
+/* ==========================
+   RESTORE LAST COIN
+========================== */
 
 
 async function restoreLastCoin(){
 
 
-const last =
-getLastCoin();
+    const last =
+    localStorage.getItem(
+        "lastCoin"
+    );
 
 
 
-if(last){
+    if(last){
+
+        await loadCoin(last);
 
 
-await loadCoin(last);
+    }
+    else{
 
 
-}
-
-else{
-
-
-await loadDefaultCoin();
+        await loadCoin(
+            "bitcoin"
+        );
 
 
-}
-
-
-}
-
-
-
-/*
---------------------------------
-FINAL APP START
---------------------------------
-*/
-
-
-async function startApp(){
-
-
-try{
-
-
-initDashboard();
-
-
-
-await restoreLastCoin();
-
+    }
 
 
 }
-
-catch(error){
-
-
-console.error(
-"Application failed",
-error
-);
-
-
-}
-
-
-}
-
-
