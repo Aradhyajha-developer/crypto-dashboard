@@ -45,12 +45,16 @@ let favList;
 let currentCoin = null;
 let initialized = false;
 
+// NEW: prevent repeated API spam
+let activeSearchController = null;
+let activeSearchToken = 0;
+const searchCache = new Map();
+
 /* ==========================================
    INIT
 ========================================== */
 
 export async function initDashboard() {
-
   if (initialized) return;
 
   initialized = true;
@@ -62,162 +66,206 @@ export async function initDashboard() {
   favList = document.getElementById("favList");
 
   await loadMarketWidgets();
-
   await initializeConverter();
 
   setupSearch();
-
   await renderFavorites();
-
   await restoreLastCoin();
 }
 
 /* ==========================================
-   SEARCH
+   SEARCH HANDLERS
 ========================================== */
 
 function setupSearch() {
-
   if (!searchInput) return;
 
   searchInput.addEventListener(
     "input",
     debounce(async (e) => {
-
       const value = e.target.value.trim();
 
       if (!value) {
-
         suggestions.innerHTML = "";
-
         return;
       }
 
       await showSuggestions(value);
-
-    }, 300)
+    }, 500)
   );
 
-  searchBtn?.addEventListener("click", () => {
-
+  searchBtn?.addEventListener("click", async () => {
     const value = searchInput.value.trim();
 
-    if (!value) return;
-
-    loadCoin(value.toLowerCase());
-
-    suggestions.innerHTML = "";
-
-  });
-
-  searchInput.addEventListener("keydown", (e) => {
-
-    if (e.key !== "Enter") return;
-
-    const value = searchInput.value.trim();
-
-    if (!value) return;
-
-    loadCoin(value.toLowerCase());
-
-    suggestions.innerHTML = "";
-
-  });
-
-}
-
-/* ==========================================
-   SEARCH SUGGESTIONS - FIXED ✅
-========================================== */
-
-async function showSuggestions(query) {
-
-  try {
-
-    const data = await searchCoin(query);
-
-    suggestions.innerHTML = "";
-
-    if (!data?.coins?.length) {
-
-      suggestions.innerHTML = `
-        <div class="suggestion-item no-results">
-          No results found
-        </div>
-      `;
-
+    if (!value) {
+      showError(results, "Please enter a coin name");
       return;
     }
 
-    data.coins
-      .slice(0, 5)
-      .forEach((coin) => {
+    await runSearch(value);
+  });
 
-        const item = document.createElement("div");
+  searchInput.addEventListener("keydown", async (e) => {
+    if (e.key !== "Enter") return;
 
-        item.className = "suggestion-item";
+    e.preventDefault();
 
-        // FIX: Use thumb properly with fallback
-        const imageUrl = coin.thumb || coin.large || "https://via.placeholder.com/24";
+    const value = searchInput.value.trim();
 
-        item.innerHTML = `
-          <img
-            src="${imageUrl}"
-            alt="${coin.name}"
-            width="24"
-            height="24"
-            loading="lazy"
-            onerror="this.src='https://via.placeholder.com/24'"
-          />
+    if (!value) {
+      showError(results, "Please enter a coin name");
+      return;
+    }
 
-          <div class="suggestion-content">
+    await runSearch(value);
+  });
 
-            <strong>${coin.name}</strong>
+  document.addEventListener("click", (e) => {
+    if (
+      !e.target.closest(".search-box") &&
+      !e.target.closest(".suggestions")
+    ) {
+      suggestions.innerHTML = "";
+    }
+  });
+}
 
-            <small>${coin.symbol.toUpperCase()}</small>
+async function runSearch(value) {
+  try {
+    showLoader();
 
-          </div>
-        `;
+    const searchResults = await searchCoin(value);
 
-        item.style.cursor = "pointer";
-        item.style.padding = "10px";
+    if (!searchResults?.coins?.length) {
+      showError(results, "Coin not found. Try Bitcoin or Ethereum.");
+      return;
+    }
 
-        item.addEventListener("click", () => {
+    const coinId = searchResults.coins[0].id;
+    await loadCoin(coinId);
 
-          searchInput.value = coin.name;
+    suggestions.innerHTML = "";
+    searchInput.value = "";
+  } catch (error) {
+    console.error("Search error:", error);
+    showError(results, "Search failed. Please try again.");
+  } finally {
+    hideLoader();
+  }
+}
 
-          suggestions.innerHTML = "";
+/* ==========================================
+   SEARCH SUGGESTIONS
+========================================== */
 
-          loadCoin(coin.id);
+async function showSuggestions(query) {
+  const normalizedQuery = query.trim().toLowerCase();
 
-        });
-
-        item.addEventListener("mouseover", () => {
-          item.style.backgroundColor = "#f0f0f0";
-        });
-
-        item.addEventListener("mouseout", () => {
-          item.style.backgroundColor = "transparent";
-        });
-
-        suggestions.appendChild(item);
-
-      });
-
+  if (normalizedQuery.length < 2) {
+    suggestions.innerHTML = "";
+    return;
   }
 
-  catch (error) {
+  if (searchCache.has(normalizedQuery)) {
+    const cached = searchCache.get(normalizedQuery);
 
-    console.error("Search Error:", error);
+    suggestions.innerHTML = "";
+    renderSuggestionList(cached);
+    return;
+  }
 
+  activeSearchToken += 1;
+  const token = activeSearchToken;
+
+  activeSearchController?.abort();
+
+  const controller = new AbortController();
+  activeSearchController = controller;
+
+  try {
+    const data = await searchCoin(normalizedQuery, { signal: controller.signal });
+
+    if (token !== activeSearchToken) return;
+
+    searchCache.set(normalizedQuery, data.coins || []);
+    suggestions.innerHTML = "";
+
+    renderSuggestionList(data.coins || []);
+  } catch (error) {
+    if (error.name === "AbortError") return;
+
+    console.error("Suggestions error:", error);
     suggestions.innerHTML = `
       <div class="suggestion-item no-results">
-        ⚠️ Search error. Try again.
+        Search error
       </div>
     `;
+  }
+}
 
+function renderSuggestionList(coins) {
+  if (!coins.length) {
+    suggestions.innerHTML = `
+      <div class="suggestion-item no-results">
+        No results found
+      </div>
+    `;
+    return;
   }
 
+  coins.slice(0, 5).forEach((coin) => {
+    const item = document.createElement("div");
+    item.className = "suggestion-item";
+
+    const imageUrl =
+      coin.thumb || coin.large || "https://via.placeholder.com/32";
+
+    item.innerHTML = `
+      <img
+        src="${imageUrl}"
+        alt="${coin.name}"
+        width="24"
+        height="24"
+        loading="lazy"
+        onerror="this.src='https://via.placeholder.com/24'"
+      />
+      <span>${coin.name} (${coin.symbol.toUpperCase()})</span>
+    `;
+
+    item.style.cssText = `
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      cursor:pointer;
+      border-bottom:1px solid #e5e7eb;
+    `;
+
+    item.addEventListener("mouseover", () => {
+      item.style.backgroundColor = "#f5f5f5";
+    });
+
+    item.addEventListener("mouseout", () => {
+      item.style.backgroundColor = "transparent";
+    });
+
+    item.addEventListener("click", async () => {
+      searchInput.value = coin.name;
+      suggestions.innerHTML = "";
+
+      try {
+        showLoader();
+        await loadCoin(coin.id);
+      } catch (error) {
+        console.error("Suggestion click error:", error);
+        showError(results, "Unable to load coin data.");
+      } finally {
+        hideLoader();
+      }
+    });
+
+    suggestions.appendChild(item);
+  });
 }
 
 /* ==========================================
@@ -225,222 +273,92 @@ async function showSuggestions(query) {
 ========================================== */
 
 async function loadCoin(id) {
-
   try {
-
     showLoader();
 
-    if (suggestions) {
-      suggestions.innerHTML = "";
+    if (!id || typeof id !== "string") {
+      throw new Error("Invalid coin id");
     }
 
-    const coin = await fetchCoin(id);
+    const coin = await fetchCoin(id.toLowerCase().trim());
 
     if (!coin) {
-      throw new Error("Coin not found");
+      throw new Error("Coin data not found");
     }
 
     currentCoin = coin;
-
     localStorage.setItem("lastCoin", coin.id);
 
     renderCoin(coin);
-
     await loadChart(coin.id);
-
   } catch (error) {
-
-    console.error("Coin Load Error:", error);
-
-    showError(
-      results,
-      "Unable to load coin data. Please try again."
-    );
-
+    console.error("Coin load error:", error);
+    showError(results, "Unable to load coin data. Please try again.");
     destroyChart();
-
   } finally {
-
     hideLoader();
-
   }
-
 }
 
 /* ==========================================
-   RENDER COIN - FIXED ✅
+   RENDER COIN
 ========================================== */
 
 function renderCoin(coin) {
-
   if (!coin || !results) return;
 
   const market = coin.market_data;
-
   const isFav = isFavorite(coin.id);
 
-  // Image fallback
-  const coinImage = coin.image.large || "https://via.placeholder.com/80";
+  const coinImage = coin.image?.large || "https://via.placeholder.com/80";
+  const priceChange = market?.price_change_percentage_24h ?? 0;
+  const priceChangeClass = priceChange >= 0 ? "positive" : "negative";
+  const priceChangeIcon = priceChange >= 0 ? "📈" : "📉";
 
   results.innerHTML = `
+    <div class="coin-card">
+      <div class="coin-header">
+        <img
+          src="${coinImage}"
+          alt="${coin.name}"
+          width="80"
+          height="80"
+          loading="lazy"
+          onerror="this.src='https://via.placeholder.com/80'"
+        />
+        <div>
+          <h2>${coin.name} (${coin.symbol.toUpperCase()})</h2>
+          <p>Rank #${coin.market_cap_rank ?? "--"}</p>
+        </div>
+      </div>
 
-<div class="coin-card">
+      <div class="coin-price">
+        <h1>${formatCurrency(market?.current_price?.usd || 0)}</h1>
+        <p class="${priceChangeClass}">
+          ${priceChangeIcon} ${formatPercent(priceChange)} (24h)
+        </p>
+      </div>
 
-  <div class="coin-header">
-
-    <img
-      src="${coinImage}"
-      alt="${coin.name}"
-      width="80"
-      height="80"
-      loading="lazy"
-      onerror="this.src='https://via.placeholder.com/80'"
-    />
-
-    <div>
-
-      <h2>
-        ${coin.name}
-        (${coin.symbol.toUpperCase()})
-      </h2>
-
-      <p>
-        Rank #${coin.market_cap_rank ?? "--"}
-      </p>
-
+      <button id="favoriteBtn">
+        ${isFav ? "⭐ Remove Favorite" : "☆ Add Favorite"}
+      </button>
     </div>
+  `;
 
-  </div>
-
-  <div class="coin-price">
-
-    <h1>
-      ${formatCurrency(
-        market.current_price.usd
-      )}
-    </h1>
-
-    <p class="${
-      market.price_change_percentage_24h >= 0
-        ? "positive"
-        : "negative"
-    }">
-
-      ${
-        formatPercent(
-          market.price_change_percentage_24h
-        )
-      }
-
-    </p>
-
-  </div>
-
-  <div class="coin-stats">
-
-    <div class="stat">
-
-      <span>Market Cap</span>
-
-      <strong>
-
-        ${formatCurrency(
-          market.market_cap.usd
-        )}
-
-      </strong>
-
-    </div>
-
-    <div class="stat">
-
-      <span>24h Volume</span>
-
-      <strong>
-
-        ${formatCurrency(
-          market.total_volume.usd
-        )}
-
-      </strong>
-
-    </div>
-
-    <div class="stat">
-
-      <span>24h High</span>
-
-      <strong>
-
-        ${formatCurrency(
-          market.high_24h.usd
-        )}
-
-      </strong>
-
-    </div>
-
-    <div class="stat">
-
-      <span>24h Low</span>
-
-      <strong>
-
-        ${formatCurrency(
-          market.low_24h.usd
-        )}
-
-      </strong>
-
-    </div>
-
-  </div>
-
-  <button
-    id="favoriteBtn"
-    class="favorite-btn"
-  >
-
-    ${
-      isFav
-        ? "⭐ Remove Favorite"
-        : "☆ Add Favorite"
-    }
-
-  </button>
-
-</div>
-
-`;
-
-  const favoriteBtn =
-    document.getElementById("favoriteBtn");
+  const favoriteBtn = document.getElementById("favoriteBtn");
 
   if (favoriteBtn) {
-
-    favoriteBtn.addEventListener(
-      "click",
-      () => {
-
-        if (isFavorite(coin.id)) {
-
-          removeFavorite(coin.id);
-
-        } else {
-
-          saveFavorite(coin.id);
-
-        }
-
-        renderCoin(coin);
-
-        renderFavorites();
-
+    favoriteBtn.addEventListener("click", () => {
+      if (isFavorite(coin.id)) {
+        removeFavorite(coin.id);
+      } else {
+        saveFavorite(coin.id);
       }
-    );
 
+      renderCoin(coin);
+      renderFavorites();
+    });
   }
-
 }
 
 /* ==========================================
@@ -448,169 +366,78 @@ function renderCoin(coin) {
 ========================================== */
 
 async function loadChart(id) {
-
   try {
-
     destroyChart();
 
-    const history =
-      await fetchHistory(id);
+    const history = await fetchHistory(id);
 
-    if (
-      !history ||
-      !history.prices ||
-      history.prices.length === 0
-    ) {
-
-      throw new Error(
-        "No chart history found"
-      );
-
+    if (!history?.prices?.length) {
+      throw new Error("No chart data available");
     }
 
-    createChart(
-      "priceChart",
-      history
-    );
-
+    createChart("priceChart", history);
   } catch (error) {
-
-    console.error(
-      "Chart Error:",
-      error
-    );
-
+    console.error("Chart error:", error);
     destroyChart();
-
   }
-
 }
 
 /* ==========================================
-   FAVORITES - FIXED ✅
+   FAVORITES
 ========================================== */
 
 async function renderFavorites() {
-
   if (!favList) return;
 
   const favorites = getFavorites();
-
   favList.innerHTML = "";
 
-  if (favorites.length === 0) {
-
-    favList.innerHTML = `
-      <li class="empty-favorites">
-        ⭐ No favorite coins yet
-      </li>
-    `;
-
+  if (!favorites.length) {
+    favList.innerHTML = `<li>No favorite coins yet</li>`;
     return;
   }
 
   try {
-
     const coins = await Promise.all(
-      favorites.map(id => fetchCoin(id))
+      favorites.map((id) => fetchCoin(id).catch(() => null))
     );
 
-    coins.forEach((coin) => {
-
+    coins.filter(Boolean).forEach((coin) => {
       const li = document.createElement("li");
-
       li.className = "favorite-item";
 
-      // Image fallback
-      const smallImage = coin.image.small || "https://via.placeholder.com/28";
-
       li.innerHTML = `
-
-<div class="favorite-row">
-
-<div class="favorite-info">
-
-<img
-src="${smallImage}"
-alt="${coin.name}"
-width="28"
-height="28"
-loading="lazy"
-onerror="this.src='https://via.placeholder.com/28'"
-/>
-
-<span>
-${coin.name}
-</span>
-
-</div>
-
-<div class="favorite-price">
-
-${formatCurrency(
-coin.market_data.current_price.usd
-)}
-
-</div>
-
-<button
-class="remove-fav"
-data-id="${coin.id}"
-title="Remove Favorite"
->
-
-❌
-
-</button>
-
-</div>
-
-`;
-
-      li.style.cursor = "pointer";
+        <div class="favorite-row">
+          <span>${coin.name}</span>
+          <button class="remove-fav" data-id="${coin.id}">❌</button>
+        </div>
+      `;
 
       favList.appendChild(li);
-
     });
-
+  } catch (error) {
+    console.error("Favorites render error:", error);
+    favList.innerHTML = `<li>Unable to load favorites</li>`;
   }
-
-  catch (error) {
-
-    console.error("Favorites Error:", error);
-
-    showError(
-      favList,
-      "Unable to load favorites."
-    );
-
-  }
-
 }
 
 /* ==========================================
    FAVORITE EVENTS
 ========================================== */
 
-favList?.addEventListener("click", (event) => {
-
+favList?.addEventListener("click", async (event) => {
   const button = event.target.closest(".remove-fav");
 
   if (!button) return;
 
-  removeFavorite(button.dataset.id);
+  const coinId = button.dataset.id;
 
-  renderFavorites();
+  removeFavorite(coinId);
+  await renderFavorites();
 
-  if (
-    currentCoin &&
-    currentCoin.id === button.dataset.id
-  ) {
-
+  if (currentCoin && currentCoin.id === coinId) {
     renderCoin(currentCoin);
-
   }
-
 });
 
 /* ==========================================
@@ -618,32 +445,24 @@ favList?.addEventListener("click", (event) => {
 ========================================== */
 
 async function restoreLastCoin() {
-
-  const lastCoin =
-    localStorage.getItem("lastCoin");
+  const lastCoin = localStorage.getItem("lastCoin");
 
   try {
-
-    if (lastCoin) {
-
-      await loadCoin(lastCoin);
-
+    if (lastCoin?.trim()) {
+      await loadCoin(lastCoin.trim());
     } else {
-
       await loadCoin("bitcoin");
-
     }
+  } catch (error) {
+    console.error("Restore coin error:", error);
 
+    try {
+      await loadCoin("bitcoin");
+    } catch (fallbackError) {
+      console.error("Fallback failed:", fallbackError);
+      showError(results, "Unable to load dashboard. Please refresh.");
+    }
   }
-
-  catch (error) {
-
-    console.error(error);
-
-    await loadCoin("bitcoin");
-
-  }
-
 }
 
 /* ==========================================
@@ -651,7 +470,5 @@ async function restoreLastCoin() {
 ========================================== */
 
 export function getCurrentCoin() {
-
   return currentCoin;
-
 }

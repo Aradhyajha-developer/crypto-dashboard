@@ -4,117 +4,27 @@ import "./css/components.css";
 import "./css/dashboard.css";
 import "./css/responsive.css";
 
-
 import Header from "./components/Header.js";
 import Footer from "./components/Footer.js";
-
-import Home from "./pages/Home.js";
-import About from "./pages/About.js";
-
-
-import { initDashboard } from "./js/dashboard.js";
 import { initializeTheme } from "./js/theme.js";
+import { initializeRouter } from "./js/router.js";
 
+const app = document.getElementById("app");
 
-const app =
-document.getElementById("app");
+function renderApp() {
+  if (!app) {
+    console.error("Missing #app container in index.html");
+    return;
+  }
 
+  app.innerHTML = `
+    ${Header()}
+    <main id="page-content"></main>
+    ${Footer()}
+  `;
 
-
-function renderApp(){
-
-
-app.innerHTML = `
-
-${Header()}
-
-
-<main id="page">
-
-${Home()}
-
-</main>
-
-
-${Footer()}
-
-`;
-
-
-
-initializeTheme();
-
-initDashboard();
-
-
-
-setupNavigation();
-
-
+  initializeTheme();
+  initializeRouter();
 }
 
-
-
-
-
-function setupNavigation(){
-
-
-const aboutBtn =
-document.getElementById("nav-about");
-
-const homeBtn =
-document.getElementById("nav-home");
-
-
-
-aboutBtn?.addEventListener(
-"click",
-(e)=>{
-
-
-e.preventDefault();
-
-
-document.getElementById("page")
-.innerHTML =
-About();
-
-
-
-}
-
-);
-
-
-
-
-homeBtn?.addEventListener(
-"click",
-(e)=>{
-
-
-e.preventDefault();
-
-
-document.getElementById("page")
-.innerHTML =
-Home();
-
-
-initDashboard();
-
-
-}
-
-);
-
-
-}
-
-
-
-document.addEventListener(
-"DOMContentLoaded",
-renderApp
-);
+document.addEventListener("DOMContentLoaded", renderApp);
