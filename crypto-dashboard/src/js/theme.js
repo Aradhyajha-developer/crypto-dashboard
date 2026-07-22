@@ -1,107 +1,105 @@
 let initialized = false;
 
+/*
+================================
+HELPERS
+================================
+*/
 
-export function initializeTheme(){
+function getSavedTheme() {
+  return localStorage.getItem("theme");
+}
 
+function getPreferredTheme() {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
 
-    if(initialized){
+function isDark() {
+  return document.body.classList.contains("dark");
+}
 
-        return;
+function updateButton(btn) {
+  if (!btn) return;
 
-    }
+  btn.textContent = isDark() ? "☀️" : "🌙";
 
+  btn.title = isDark()
+    ? "Switch to Light Mode"
+    : "Switch to Dark Mode";
+}
 
-    initialized = true;
+function applyTheme(theme) {
+  document.body.classList.toggle(
+    "dark",
+    theme === "dark"
+  );
 
+  localStorage.setItem("theme", theme);
+}
 
+/*
+================================
+INITIALIZE THEME
+================================
+*/
 
-    const themeBtn =
+export function initializeTheme() {
+  if (initialized) return;
+
+  initialized = true;
+
+  const themeBtn =
     document.getElementById("themeBtn");
 
+  const savedTheme =
+    getSavedTheme() || getPreferredTheme();
 
+  applyTheme(savedTheme);
 
-    const savedTheme =
-    localStorage.getItem("theme");
+  updateButton(themeBtn);
 
+  if (!themeBtn) {
+    console.warn("Theme button not found.");
+    return;
+  }
 
+  themeBtn.addEventListener("click", () => {
+    const nextTheme = isDark()
+      ? "light"
+      : "dark";
 
-    if(savedTheme === "dark"){
+    applyTheme(nextTheme);
 
-        document.body.classList.add("dark");
+    updateButton(themeBtn);
+  });
+}
 
-    }
+/*
+================================
+TOGGLE PROGRAMMATICALLY
+================================
+*/
 
+export function toggleTheme() {
+  const nextTheme = isDark()
+    ? "light"
+    : "dark";
 
+  applyTheme(nextTheme);
 
-    if(!themeBtn){
+  updateButton(
+    document.getElementById("themeBtn")
+  );
+}
 
-        console.log(
-            "Theme button not found"
-        );
+/*
+================================
+GET CURRENT THEME
+================================
+*/
 
-        return;
-
-    }
-
-
-
-
-    themeBtn.addEventListener(
-
-        "click",
-
-        ()=>{
-
-
-            document.body.classList.toggle(
-                "dark"
-            );
-
-
-
-            const isDark =
-            document.body.classList.contains(
-                "dark"
-            );
-
-
-
-            localStorage.setItem(
-
-                "theme",
-
-                isDark
-                ?
-                "dark"
-                :
-                "light"
-
-            );
-
-
-
-            themeBtn.textContent =
-            isDark
-            ?
-            "☀️"
-            :
-            "🌙";
-
-
-        }
-
-    );
-
-
-
-    // Initial icon update
-
-    themeBtn.textContent =
-    document.body.classList.contains("dark")
-    ?
-    "☀️"
-    :
-    "🌙";
-
-
+export function getCurrentTheme() {
+  return isDark() ? "dark" : "light";
 }

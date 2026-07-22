@@ -1,411 +1,277 @@
 import {
-    fetchMarketOverview,
-    fetchTopGainers,
-    fetchTopLosers
+  fetchMarketOverview,
+  fetchTopGainers,
+  fetchTopLosers
 } from "./api.js";
 
-
 import {
-    formatCurrency,
-    formatPercent,
-    showError
+  formatCurrency,
+  formatPercent,
+  showError
 } from "./utils.js";
 
+/* ==========================================
+   HELPERS
+========================================== */
 
-
-/* ==========================
-   Helper
-========================== */
-
-
-function setText(id, value){
-
-    const element =
-    document.getElementById(id);
-
-
-    if(element){
-
-        element.textContent = value;
-
-    }
-
+function getElement(id) {
+  return document.getElementById(id);
 }
 
+function setText(id, value) {
+  const element = getElement(id);
 
-
-
-
-/* ==========================
-   Market Overview
-========================== */
-
-
-export async function loadMarketOverview(){
-
-
-    try{
-
-
-        const market =
-        await fetchMarketOverview();
-
-
-
-        setText(
-
-            "marketCap",
-
-            formatCurrency(
-                market.total_market_cap.usd
-            )
-
-        );
-
-
-
-        setText(
-
-            "marketVolume",
-
-            formatCurrency(
-                market.total_volume.usd
-            )
-
-        );
-
-
-
-        setText(
-
-            "btcDom",
-
-            formatPercent(
-                market.market_cap_percentage.btc
-            )
-
-        );
-
-
-
-        setText(
-
-            "ethDom",
-
-            formatPercent(
-                market.market_cap_percentage.eth
-            )
-
-        );
-
-
-    }
-
-    catch(error){
-
-
-        console.error(
-            "Market overview error",
-            error
-        );
-
-
-        setText(
-            "marketCap",
-            "--"
-        );
-
-
-        setText(
-            "marketVolume",
-            "--"
-        );
-
-
-        setText(
-            "btcDom",
-            "--"
-        );
-
-
-        setText(
-            "ethDom",
-            "--"
-        );
-
-
-    }
-
-
+  if (element) {
+    element.textContent = value;
+  }
 }
 
+function setLoading(id) {
+  const element = getElement(id);
 
+  if (element) {
+    element.innerHTML = "<p>Loading...</p>";
+  }
+}
 
+function clearLoading(id) {
+  const element = getElement(id);
 
+  if (element) {
+    element.innerHTML = "";
+  }
+}
 
+/* ==========================================
+   MARKET OVERVIEW
+========================================== */
 
+export async function loadMarketOverview() {
+  try {
+    const market = await fetchMarketOverview();
 
-/* ==========================
-   Render Coin List
-========================== */
-
-
-function renderCoins(
-    elementId,
-    coins
-){
-
-
-    const list =
-    document.getElementById(
-        elementId
+    setText(
+      "marketCap",
+      formatCurrency(
+        market?.total_market_cap?.usd || 0
+      )
     );
 
+    setText(
+      "marketVolume",
+      formatCurrency(
+        market?.total_volume?.usd || 0
+      )
+    );
 
+    setText(
+      "btcDom",
+      formatPercent(
+        market?.market_cap_percentage?.btc || 0
+      )
+    );
 
-    if(!list)
+    setText(
+      "ethDom",
+      formatPercent(
+        market?.market_cap_percentage?.eth || 0
+      )
+    );
+
+  } catch (error) {
+
+    console.error("Market Overview Error:", error);
+
+    setText("marketCap", "--");
+    setText("marketVolume", "--");
+    setText("btcDom", "--");
+    setText("ethDom", "--");
+  }
+}
+
+/* ==========================================
+   RENDER COINS
+========================================== */
+
+function renderCoins(elementId, coins) {
+
+  const list = getElement(elementId);
+
+  if (!list) return;
+
+  clearLoading(elementId);
+
+  if (!coins?.length) {
+
+    list.innerHTML =
+      "<p>No market data available.</p>";
+
     return;
+  }
 
+  const fragment =
+    document.createDocumentFragment();
 
+  coins.forEach((coin) => {
 
-    list.innerHTML="";
+    const li =
+      document.createElement("li");
 
+    const change =
+      Number(
+        coin.price_change_percentage_24h || 0
+      );
 
+    li.innerHTML = `
+      <div class="coin-row">
 
-    coins.forEach(
-        coin=>{
+        <div class="coin-info">
 
+          <img
+            src="${coin.image}"
+            alt="${coin.name}"
+            width="30"
+            height="30"
+            loading="lazy"
+          />
 
-            const change =
-            Number(
-                coin.price_change_percentage_24h || 0
-            );
+          <span>${coin.name}</span>
 
+        </div>
 
+        <div class="coin-price">
 
-            const li =
-            document.createElement(
-                "li"
-            );
+          <strong>
+            ${formatCurrency(coin.current_price)}
+          </strong>
 
+          <small class="${
+            change >= 0
+              ? "positive"
+              : "negative"
+          }">
 
+            ${
+              change >= 0
+                ? "+"
+                : ""
+            }
 
-            li.innerHTML = `
+            ${change.toFixed(2)}%
 
-            <div class="coin-row">
+          </small>
 
+        </div>
 
-                <div class="coin-info">
+      </div>
+    `;
 
+    fragment.appendChild(li);
 
-                    <img
+  });
 
-                    src="${coin.image}"
+  list.innerHTML = "";
 
-                    width="30"
+  list.appendChild(fragment);
+}
 
-                    height="30"
+/* ==========================================
+   TOP GAINERS
+========================================== */
 
-                    >
+export async function loadTopGainers() {
 
+  setLoading("gainers");
 
-                    <span>
+  try {
 
-                    ${coin.name}
+    const coins =
+      await fetchTopGainers();
 
-                    </span>
-
-
-                </div>
-
-
-
-                <div class="coin-price">
-
-
-                    <strong>
-
-                    ${formatCurrency(
-                        coin.current_price
-                    )}
-
-                    </strong>
-
-
-
-                    <small class="${
-                        change >=0
-                        ?
-                        "positive"
-                        :
-                        "negative"
-                    }">
-
-                    ${
-                        change>=0
-                        ?
-                        "+"
-                        :
-                        ""
-                    }
-
-                    ${change.toFixed(2)}%
-
-                    </small>
-
-
-                </div>
-
-
-            </div>
-
-            `;
-
-
-
-            list.appendChild(li);
-
-
-
-        }
-
+    renderCoins(
+      "gainers",
+      coins
     );
 
+  } catch (error) {
 
+    console.error(error);
 
-}
+    showError(
+      getElement("gainers"),
+      "Unable to load Top Gainers."
+    );
 
-
-
-
-
-
-
-/* ==========================
-   Gainers
-========================== */
-
-
-export async function loadTopGainers(){
-
-
-    try{
-
-
-        const coins =
-        await fetchTopGainers();
-
-
-
-        renderCoins(
-            "gainers",
-            coins
-        );
-
-
-    }
-
-    catch(error){
-
-
-        console.error(
-            error
-        );
-
-
-        showError(
-
-            document.getElementById(
-                "gainers"
-            ),
-
-            "Unable to load gainers"
-
-        );
-
-
-    }
-
+  }
 
 }
 
+/* ==========================================
+   TOP LOSERS
+========================================== */
 
+export async function loadTopLosers() {
 
+  setLoading("losers");
 
+  try {
 
+    const coins =
+      await fetchTopLosers();
 
+    renderCoins(
+      "losers",
+      coins
+    );
 
-/* ==========================
-   Losers
-========================== */
+  } catch (error) {
 
+    console.error(error);
 
-export async function loadTopLosers(){
+    showError(
+      getElement("losers"),
+      "Unable to load Top Losers."
+    );
 
-
-    try{
-
-
-        const coins =
-        await fetchTopLosers();
-
-
-
-        renderCoins(
-            "losers",
-            coins
-        );
-
-
-    }
-
-    catch(error){
-
-
-        console.error(
-            error
-        );
-
-
-        showError(
-
-            document.getElementById(
-                "losers"
-            ),
-
-            "Unable to load losers"
-
-        );
-
-
-    }
-
+  }
 
 }
 
+/* ==========================================
+   LOAD ALL MARKET WIDGETS
+========================================== */
 
+export async function loadMarketWidgets() {
 
-
-
-
-
-/* ==========================
-   MAIN MARKET LOADER
-========================== */
-
-
-export async function loadMarketWidgets(){
-
+  try {
 
     await Promise.all([
 
-        loadMarketOverview(),
+      loadMarketOverview(),
 
-        loadTopGainers(),
+      loadTopGainers(),
 
-        loadTopLosers()
+      loadTopLosers()
 
     ]);
 
+  } catch (error) {
+
+    console.error(
+      "Market Widget Error:",
+      error
+    );
+
+  }
+
+}
+
+/* ==========================================
+   REFRESH MARKET
+========================================== */
+
+export async function refreshMarketWidgets() {
+
+  return loadMarketWidgets();
 
 }

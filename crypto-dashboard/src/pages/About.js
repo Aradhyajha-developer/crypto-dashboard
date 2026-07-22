@@ -1,87 +1,55 @@
-export default function About(){
-
-return `
+export default function About() {
+  return `
 
 <section class="about-page">
 
-<div class="about-card">
-
 <h1>
-🚀 About CryptoDash
+
+About CryptoDash
+
 </h1>
 
-
 <p>
 
-CryptoDash is a modern real-time cryptocurrency
-tracking dashboard built for fintech applications.
+CryptoDash is a professional cryptocurrency dashboard built using
+
+HTML
+
+CSS
+
+JavaScript
+
+Vite
+
+CoinGecko API
+
+Chart.js
 
 </p>
 
+<h2>
 
-<p>
+Features
 
-It provides live market data, interactive charts,
-favorites management and market insights using
-public cryptocurrency APIs.
+</h2>
 
-</p>
+<ul>
 
+<li>Live Prices</li>
 
+<li>Charts</li>
 
-<div class="about-grid">
+<li>Favorites</li>
 
+<li>Dark Mode</li>
 
-<div class="about-box">
+<li>Currency Converter</li>
 
-<h3>
-📊 Live Data
-</h3>
+<li>Market Overview</li>
 
-<p>
-Real-time cryptocurrency prices powered by APIs.
-</p>
-
-</div>
-
-
-
-<div class="about-box">
-
-<h3>
-📈 Analytics
-</h3>
-
-<p>
-Interactive 7 day price charts and market trends.
-</p>
-
-</div>
-
-
-
-
-<div class="about-box">
-
-<h3>
-⚡ Performance
-</h3>
-
-<p>
-Responsive and optimized dashboard experience.
-</p>
-
-</div>
-
-
-
-</div>
-
-
-</div>
+</ul>
 
 </section>
 
 `;
-
 }
