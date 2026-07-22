@@ -1,16 +1,43 @@
 export default function Home() {
-  return `
 
-<section class="dashboard">
+return `
 
-<div class="search-section">
+<div class="dashboard-container">
+
+
+<!-- HERO -->
+
+<section class="hero">
+
+<h1>
+Crypto Market Dashboard
+</h1>
+
+
+<p>
+Track live cryptocurrency prices, market trends and favorites.
+</p>
+
+
+
+<div class="search-box">
+
 
 <input
+
 id="search"
+
 type="text"
-placeholder="Search Cryptocurrency..."
+
+placeholder="Search Bitcoin, Ethereum..."
+
 autocomplete="off"
+
+spellcheck="false"
+
 />
+
+
 
 <button id="searchBtn">
 
@@ -18,89 +45,305 @@ Search
 
 </button>
 
-<div id="suggestions"></div>
+
 
 </div>
 
-<div id="results"></div>
 
-<section class="market-overview">
+<div 
+id="suggestions"
+class="suggestions">
+</div>
+
+
+</section>
+
+
+
+
+
+<!-- COIN RESULT -->
+
+
+<section class="section">
+
+
+<div id="results">
+
+
+<div class="placeholder-card">
+
+Search a cryptocurrency to view details
+
+</div>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+<!-- MARKET OVERVIEW -->
+
+
+<section class="section">
+
 
 <h2>
-
 Market Overview
-
 </h2>
 
-<div id="marketOverview"></div>
 
-</section>
 
-<section class="gainers-losers">
+<div class="market-grid">
 
-<div>
 
-<h2>
 
-Top Gainers
+<div class="market-card">
 
-</h2>
+<h3>
+Market Cap
+</h3>
 
-<div id="topGainers"></div>
+<p id="marketCap">
+--
+</p>
 
 </div>
 
-<div>
 
-<h2>
 
-Top Losers
 
-</h2>
 
-<div id="topLosers"></div>
+<div class="market-card">
+
+<h3>
+24h Volume
+</h3>
+
+<p id="marketVolume">
+--
+</p>
 
 </div>
 
+
+
+
+
+<div class="market-card">
+
+<h3>
+BTC Dominance
+</h3>
+
+<p id="btcDom">
+--
+</p>
+
+</div>
+
+
+
+
+
+<div class="market-card">
+
+<h3>
+ETH Dominance
+</h3>
+
+<p id="ethDom">
+--
+</p>
+
+</div>
+
+
+
+</div>
+
+
 </section>
 
-<section class="chart-section">
+
+
+
+
+
+
+<!-- GAINERS LOSERS -->
+
+
+<section class="widgets">
+
+
+
+<div class="widget">
+
 
 <h2>
+Top Gainers 🚀
+</h2>
 
+
+<ul id="gainers">
+
+</ul>
+
+
+</div>
+
+
+
+
+
+<div class="widget">
+
+
+<h2>
+Top Losers 📉
+</h2>
+
+
+<ul id="losers">
+
+</ul>
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+<!-- CHART -->
+
+
+<section class="chart-card">
+
+
+<h2>
 7 Day Price Chart
-
 </h2>
+
+
+<div class="chart-container">
+
 
 <canvas id="priceChart"></canvas>
 
+
+</div>
+
+
+
 </section>
 
-<section class="converter">
+
+
+
+
+
+
+
+<!-- CONVERTER -->
+
+
+<section class="section">
+
 
 <h2>
-
 USD → INR Converter
-
 </h2>
 
-<div id="converter"></div>
+
+
+<div class="converter-box">
+
+
+<input
+
+id="usd"
+
+type="number"
+
+min="0"
+
+placeholder="Enter USD"
+
+/>
+
+
+
+
+<button id="convertBtn">
+
+Convert
+
+</button>
+
+
+</div>
+
+
+
+<p id="usdRate">
+
+</p>
+
+
+<h3 id="inrResult">
+
+</h3>
+
 
 </section>
 
-<section>
+
+
+
+
+
+
+
+<!-- FAVORITES -->
+
+
+<section class="section">
+
 
 <h2>
-
-Favorites
-
+⭐ Favorites
 </h2>
 
-<div id="favList"></div>
+
+
+<ul id="favList">
+
+</ul>
+
+
 
 </section>
 
-</section>
+
+
+
+</div>
 
 `;
+
 }

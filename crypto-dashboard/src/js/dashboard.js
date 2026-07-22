@@ -1,761 +1,630 @@
 ﻿import {
-    searchCoin,
-    fetchCoin,
-    fetchHistory
+  searchCoin,
+  fetchCoin,
+  fetchHistory
 } from "./api.js";
 
-
 import {
-    saveFavorite,
-    removeFavorite,
-    getFavorites,
-    isFavorite
+  saveFavorite,
+  removeFavorite,
+  getFavorites,
+  isFavorite
 } from "./storage.js";
 
-
 import {
-    createChart,
-    destroyChart
+  createChart,
+  destroyChart
 } from "./chart.js";
 
-
 import {
-    loadMarketWidgets
+  loadMarketWidgets
 } from "./market.js";
 
-
 import {
-    initializeConverter
+  initializeConverter
 } from "./converter.js";
 
-
 import {
-    initializeTheme
-} from "./theme.js";
-
-
-import {
-    showLoader,
-    hideLoader
+  showLoader,
+  hideLoader
 } from "./loader.js";
 
-
 import {
-    formatCurrency,
-    formatPercent,
-    debounce,
-    showError
+  formatCurrency,
+  formatPercent,
+  debounce,
+  showError
 } from "./utils.js";
 
-
-
-const searchInput =
-document.getElementById("search");
-
-
-const searchBtn =
-document.getElementById("searchBtn");
-
-
-const suggestions =
-document.getElementById("suggestions");
-
-
-const results =
-document.getElementById("results");
-
-
-const favList =
-document.getElementById("favList");
-
-
+let searchInput;
+let searchBtn;
+let suggestions;
+let results;
+let favList;
 
 let currentCoin = null;
+let initialized = false;
 
-
-
-
-/* ==========================
+/* ==========================================
    INIT
-========================== */
+========================================== */
 
+export async function initDashboard() {
 
-export async function initDashboard(){
+  if (initialized) return;
 
+  initialized = true;
 
-    initializeTheme();
+  searchInput = document.getElementById("search");
+  searchBtn = document.getElementById("searchBtn");
+  suggestions = document.getElementById("suggestions");
+  results = document.getElementById("results");
+  favList = document.getElementById("favList");
 
+  await loadMarketWidgets();
 
-    await loadMarketWidgets();
+  await initializeConverter();
 
+  setupSearch();
 
-    await initializeConverter();
+  await renderFavorites();
 
-
-    setupSearch();
-
-
-    await renderFavorites();
-
-
-    await restoreLastCoin();
-
-
+  await restoreLastCoin();
 }
 
-
-
-
-
-/* ==========================
+/* ==========================================
    SEARCH
-========================== */
+========================================== */
 
+function setupSearch() {
 
-function setupSearch(){
+  if (!searchInput) return;
 
+  searchInput.addEventListener(
+    "input",
+    debounce(async (e) => {
 
-    if(!searchInput)
-    return;
+      const value = e.target.value.trim();
 
+      if (!value) {
 
+        suggestions.innerHTML = "";
 
-    searchInput.addEventListener(
+        return;
+      }
 
-        "input",
+      await showSuggestions(value);
 
-        debounce(
+    }, 300)
+  );
 
-            async(e)=>{
+  searchBtn?.addEventListener("click", () => {
 
+    const value = searchInput.value.trim();
 
-                const value =
-                e.target.value.trim();
+    if (!value) return;
 
+    loadCoin(value.toLowerCase());
 
+    suggestions.innerHTML = "";
 
-                if(!value){
+  });
 
-                    suggestions.innerHTML="";
+  searchInput.addEventListener("keydown", (e) => {
 
-                    return;
+    if (e.key !== "Enter") return;
 
-                }
+    const value = searchInput.value.trim();
 
+    if (!value) return;
 
+    loadCoin(value.toLowerCase());
 
-                await showSuggestions(value);
+    suggestions.innerHTML = "";
 
-
-            },
-
-            400
-
-        )
-
-    );
-
-
-
-
-
-    searchBtn?.addEventListener(
-
-        "click",
-
-        ()=>{
-
-
-            const value =
-            searchInput.value.trim();
-
-
-
-            if(value){
-
-                loadCoin(value.toLowerCase());
-
-                suggestions.innerHTML="";
-
-            }
-
-
-        }
-
-    );
-
-
-
-
-
-    searchInput.addEventListener(
-
-        "keypress",
-
-        (e)=>{
-
-
-            if(e.key==="Enter"){
-
-
-                const value =
-                searchInput.value.trim();
-
-
-
-                if(value){
-
-                    loadCoin(value.toLowerCase());
-
-                    suggestions.innerHTML="";
-
-                }
-
-
-            }
-
-
-        }
-
-    );
-
+  });
 
 }
 
+/* ==========================================
+   SEARCH SUGGESTIONS
+========================================== */
 
+async function showSuggestions(query) {
 
+  try {
 
+    const data = await searchCoin(query);
 
+    suggestions.innerHTML = "";
 
-/* ==========================
-   SUGGESTIONS
-========================== */
+    if (!data?.coins?.length) {
 
+      suggestions.innerHTML = `
+        <div class="suggestion-item">
+          No results found
+        </div>
+      `;
 
-async function showSuggestions(query){
+      return;
+    }
 
+    data.coins
+      .slice(0, 5)
+      .forEach((coin) => {
 
-    try{
+        const item = document.createElement("div");
 
+        item.className = "suggestion-item";
 
-        const data =
-        await searchCoin(query);
+        item.innerHTML = `
+          <img
+            src="${coin.thumb}"
+            alt="${coin.name}"
+            width="24"
+            height="24"
+            loading="lazy"
+          />
 
+          <div>
 
+            <strong>${coin.name}</strong>
 
-        suggestions.innerHTML="";
+            <small>
+              ${coin.symbol.toUpperCase()}
+            </small>
 
+          </div>
+        `;
 
+        item.addEventListener("click", () => {
 
-        data.coins
-        .slice(0,5)
-        .forEach(coin=>{
+          searchInput.value = coin.name;
 
+          suggestions.innerHTML = "";
 
-            const div =
-            document.createElement("div");
-
-
-
-            div.className =
-            "suggestion-item";
-
-
-
-            div.innerHTML = `
-
-            <img src="${coin.thumb}" width="25">
-
-            <span>
-            ${coin.name}
-            (${coin.symbol.toUpperCase()})
-            </span>
-
-            `;
-
-
-
-            div.onclick = ()=>{
-
-
-                searchInput.value =
-                coin.name;
-
-
-
-                loadCoin(
-                    coin.id
-                );
-
-
-
-                suggestions.innerHTML="";
-
-
-            };
-
-
-
-            suggestions.appendChild(div);
-
-
+          loadCoin(coin.id);
 
         });
 
+        suggestions.appendChild(item);
 
+      });
 
-    }
+  }
 
-    catch(error){
+  catch (error) {
 
-        console.log(error);
+    console.error(error);
 
-    }
+    suggestions.innerHTML = "";
 
+  }
 
 }
-
-
-
-
-
-
-/* ==========================
+/* ==========================================
    LOAD COIN
-========================== */
+========================================== */
 
+async function loadCoin(id) {
 
-async function loadCoin(id){
+  try {
 
+    showLoader();
 
-    try{
-
-
-        showLoader();
-
-
-
-        const coin =
-        await fetchCoin(id);
-
-
-
-        currentCoin =
-        coin;
-
-
-
-        localStorage.setItem(
-            "lastCoin",
-            coin.id
-        );
-
-
-
-        renderCoin(
-            coin
-        );
-
-
-
-        await loadChart(
-            coin.id
-        );
-
-
-
-        hideLoader();
-
-
+    if (suggestions) {
+      suggestions.innerHTML = "";
     }
 
+    const coin = await fetchCoin(id);
 
-    catch(error){
-
-
-        console.error(
-            error
-        );
-
-
-        hideLoader();
-
-
-
-        showError(
-            results,
-            "Coin load failed"
-        );
-
-
+    if (!coin) {
+      throw new Error("Coin not found");
     }
 
+    currentCoin = coin;
+
+    localStorage.setItem("lastCoin", coin.id);
+
+    renderCoin(coin);
+
+    await loadChart(coin.id);
+
+  } catch (error) {
+
+    console.error("Coin Load Error:", error);
+
+    showError(
+      results,
+      "Unable to load coin data."
+    );
+
+    destroyChart();
+
+  } finally {
+
+    hideLoader();
+
+  }
 
 }
 
-
-
-
-
-
-/* ==========================
+/* ==========================================
    RENDER COIN
-========================== */
+========================================== */
 
+function renderCoin(coin) {
 
-function renderCoin(coin){
+  if (!coin || !results) return;
 
+  const market = coin.market_data;
 
-    const market =
-    coin.market_data;
+  const isFav = isFavorite(coin.id);
 
+  results.innerHTML = `
 
+<div class="coin-card">
 
-    results.innerHTML = `
+  <div class="coin-header">
 
-    <div class="card coin-card">
+    <img
+      src="${coin.image.large}"
+      alt="${coin.name}"
+      width="80"
+      height="80"
+      loading="lazy"
+    />
 
+    <div>
 
-        <img 
-        src="${coin.image.large}"
-        width="80"
-        >
-
-
-        <h2>
+      <h2>
         ${coin.name}
         (${coin.symbol.toUpperCase()})
-        </h2>
+      </h2>
 
-
-
-        <h1>
-        ${formatCurrency(
-            market.current_price.usd
-        )}
-        </h1>
-
-
-
-        <p class="${
-            market.price_change_percentage_24h >= 0
-            ?
-            "positive"
-            :
-            "negative"
-        }">
-
-        ${formatPercent(
-            market.price_change_percentage_24h
-        )}
-
-        </p>
-
-
-
-        <button id="favoriteBtn">
-
-        ${
-            isFavorite(coin.id)
-            ?
-            "⭐ Remove Favorite"
-            :
-            "☆ Add Favorite"
-        }
-
-        </button>
-
+      <p>
+        Rank #${coin.market_cap_rank ?? "--"}
+      </p>
 
     </div>
 
+  </div>
+
+  <div class="coin-price">
+
+    <h1>
+      ${formatCurrency(
+        market.current_price.usd
+      )}
+    </h1>
+
+    <p class="${
+      market.price_change_percentage_24h >= 0
+        ? "positive"
+        : "negative"
+    }">
+
+      ${
+        formatPercent(
+          market.price_change_percentage_24h
+        )
+      }
+
+    </p>
+
+  </div>
+
+  <div class="coin-stats">
+
+    <div class="stat">
+
+      <span>Market Cap</span>
+
+      <strong>
+
+        ${formatCurrency(
+          market.market_cap.usd
+        )}
+
+      </strong>
+
+    </div>
+
+    <div class="stat">
+
+      <span>24h Volume</span>
+
+      <strong>
+
+        ${formatCurrency(
+          market.total_volume.usd
+        )}
+
+      </strong>
+
+    </div>
+
+    <div class="stat">
+
+      <span>24h High</span>
+
+      <strong>
+
+        ${formatCurrency(
+          market.high_24h.usd
+        )}
+
+      </strong>
+
+    </div>
+
+    <div class="stat">
+
+      <span>24h Low</span>
+
+      <strong>
+
+        ${formatCurrency(
+          market.low_24h.usd
+        )}
+
+      </strong>
+
+    </div>
+
+  </div>
+
+  <button
+    id="favoriteBtn"
+    class="favorite-btn"
+  >
+
+    ${
+      isFav
+        ? "⭐ Remove Favorite"
+        : "☆ Add Favorite"
+    }
+
+  </button>
+
+</div>
+
+`;
+
+  const favoriteBtn =
+    document.getElementById("favoriteBtn");
+
+  if (favoriteBtn) {
+
+    favoriteBtn.addEventListener(
+      "click",
+      () => {
+
+        if (isFavorite(coin.id)) {
+
+          removeFavorite(coin.id);
+
+        } else {
+
+          saveFavorite(coin.id);
+
+        }
+
+        renderCoin(coin);
+
+        renderFavorites();
+
+      }
+    );
+
+  }
+
+}
+
+/* ==========================================
+   LOAD CHART
+========================================== */
+
+async function loadChart(id) {
+
+  try {
+
+    destroyChart();
+
+    const history =
+      await fetchHistory(id);
+
+    if (
+      !history ||
+      !history.prices ||
+      history.prices.length === 0
+    ) {
+
+      throw new Error(
+        "No chart history found"
+      );
+
+    }
+
+    createChart(
+      "priceChart",
+      history
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Chart Error:",
+      error
+    );
+
+    destroyChart();
+
+  }
+
+}
+/* ==========================================
+   FAVORITES
+========================================== */
+
+async function renderFavorites() {
+
+  if (!favList) return;
+
+  const favorites = getFavorites();
+
+  favList.innerHTML = "";
+
+  if (favorites.length === 0) {
+
+    favList.innerHTML = `
+      <li class="empty-favorites">
+        ⭐ No favorite coins yet
+      </li>
     `;
 
-
-
-
-    document
-    .getElementById("favoriteBtn")
-    ?.addEventListener(
-
-        "click",
-
-        ()=>{
-
-
-            if(
-                isFavorite(coin.id)
-            ){
-
-                removeFavorite(
-                    coin.id
-                );
-
-
-            }
-            else{
-
-
-                saveFavorite(
-                    coin.id
-                );
-
-
-            }
-
-
-
-            renderCoin(
-                coin
-            );
-
-
-            renderFavorites();
-
-
-        }
-
-    );
-
-
-}
-
-
-
-
-
-
-
-/* ==========================
-   CHART
-========================== */
-
-
-async function loadChart(id){
-
-
-    try{
-
-
-        destroyChart();
-
-
-
-        const history =
-        await fetchHistory(id);
-
-
-
-        createChart(
-            "priceChart",
-            history
-        );
-
-
-    }
-
-
-    catch(error){
-
-
-        console.log(
-            "Chart error",
-            error
-        );
-
-
-        destroyChart();
-
-
-    }
-
-
-}
-
-
-
-
-
-
-
-/* ==========================
-   FAVORITES
-========================== */
-
-
-async function renderFavorites(){
-
-
-    if(!favList)
     return;
+  }
 
+  try {
 
+    const coins = await Promise.all(
+      favorites.map(id => fetchCoin(id))
+    );
 
-    const favorites =
-    getFavorites();
+    coins.forEach((coin) => {
 
+      const li = document.createElement("li");
 
+      li.className = "favorite-item";
 
-    favList.innerHTML="";
+      li.innerHTML = `
 
+<div class="favorite-row">
 
+<div class="favorite-info">
 
-    if(
-        favorites.length===0
-    ){
+<img
+src="${coin.image.small}"
+alt="${coin.name}"
+width="28"
+height="28"
+loading="lazy"
+/>
 
+<span>
 
-        favList.innerHTML =
-        "<li>No favorites yet ⭐</li>";
+${coin.name}
 
-        return;
+</span>
 
+</div>
 
-    }
+<div class="favorite-price">
 
+${formatCurrency(
+coin.market_data.current_price.usd
+)}
 
+</div>
 
+<button
+class="remove-fav"
+data-id="${coin.id}"
+title="Remove Favorite"
+>
 
-    for(
-        const id of favorites
-    ){
+❌
 
+</button>
 
-        try{
+</div>
 
+`;
 
-            const coin =
-            await fetchCoin(id);
+      favList.appendChild(li);
 
+    });
 
+  }
 
-            const li =
-            document.createElement("li");
+  catch (error) {
 
+    console.error(error);
 
+    showError(
+      favList,
+      "Unable to load favorites."
+    );
 
-            li.innerHTML = `
-
-
-            <span>
-
-            ${coin.name}
-
-            </span>
-
-
-            <strong>
-
-            ${formatCurrency(
-                coin.market_data.current_price.usd
-            )}
-
-            </strong>
-
-
-            <button
-            class="remove-fav"
-            data-id="${id}"
-            >
-
-            ❌
-
-            </button>
-
-
-            `;
-
-
-
-            favList.appendChild(
-                li
-            );
-
-
-        }
-
-        catch(error){
-
-            console.log(error);
-
-        }
-
-
-    }
-
+  }
 
 }
 
+/* ==========================================
+   FAVORITE EVENTS
+========================================== */
 
+favList?.addEventListener("click", (event) => {
 
+  const button = event.target.closest(".remove-fav");
 
+  if (!button) return;
 
+  removeFavorite(button.dataset.id);
 
-favList?.addEventListener(
+  renderFavorites();
 
-    "click",
+  if (
+    currentCoin &&
+    currentCoin.id === button.dataset.id
+  ) {
 
-    (e)=>{
+    renderCoin(currentCoin);
 
+  }
 
-        if(
-            e.target.classList.contains(
-                "remove-fav"
-            )
-        ){
+});
 
-
-            removeFavorite(
-                e.target.dataset.id
-            );
-
-
-
-            renderFavorites();
-
-
-        }
-
-
-    }
-
-);
-
-
-
-
-
-
-
-/* ==========================
+/* ==========================================
    RESTORE LAST COIN
-========================== */
+========================================== */
 
+async function restoreLastCoin() {
 
-async function restoreLastCoin(){
+  const lastCoin =
+    localStorage.getItem("lastCoin");
 
+  try {
 
-    const last =
-    localStorage.getItem(
-        "lastCoin"
-    );
+    if (lastCoin) {
 
+      await loadCoin(lastCoin);
 
+    } else {
 
-    if(last){
-
-        await loadCoin(last);
-
-
-    }
-    else{
-
-
-        await loadCoin(
-            "bitcoin"
-        );
-
+      await loadCoin("bitcoin");
 
     }
 
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    await loadCoin("bitcoin");
+
+  }
+
+}
+
+/* ==========================================
+   EXPORT CURRENT COIN
+========================================== */
+
+export function getCurrentCoin() {
+
+  return currentCoin;
 
 }

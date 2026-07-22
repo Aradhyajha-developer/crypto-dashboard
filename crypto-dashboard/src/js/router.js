@@ -1,6 +1,6 @@
-import Home from "./pages/Home.js";
-import About from "./pages/About.js";
-import Favorites from "./pages/Favorites.js";
+import Home from "../pages/Home.js";
+import About from "../pages/About.js";
+import Favorites from "../pages/favorites.js";
 
 const routes = {
   "#home": Home,
@@ -9,15 +9,15 @@ const routes = {
 };
 
 export function renderRoute() {
-  const appContent = document.getElementById("page-content");
+  const page = document.getElementById("page-content");
 
-  if (!appContent) return;
+  if (!page) return;
 
   const hash = window.location.hash || "#home";
 
-  const Page = routes[hash] || Home;
+  const Component = routes[hash] || Home;
 
-  appContent.innerHTML = Page();
+  page.innerHTML = Component();
 }
 
 export function initializeRouter() {

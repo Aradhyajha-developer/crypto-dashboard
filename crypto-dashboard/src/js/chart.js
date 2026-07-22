@@ -1,16 +1,23 @@
 import Chart from "chart.js/auto";
 
+
 let chartInstance = null;
+
+
 
 /*
 ================================
-HELPER
+THEME CHECK
 ================================
 */
 
-function isDarkMode() {
-  return document.documentElement.classList.contains("dark");
+function isDarkMode(){
+
+return document.body.classList.contains("dark");
+
 }
+
+
 
 /*
 ================================
@@ -18,162 +25,443 @@ CREATE CHART
 ================================
 */
 
-export function createChart(canvasId, historyData) {
-  try {
-    const canvas = document.getElementById(canvasId);
 
-    if (!canvas) {
-      console.error("Chart canvas not found.");
-      return;
-    }
+export function createChart(
+canvasId,
+historyData
+){
 
-    const ctx = canvas.getContext("2d");
 
-    if (!ctx) {
-      console.error("Canvas context unavailable.");
-      return;
-    }
+try{
 
-    if (
-      !historyData ||
-      !Array.isArray(historyData.prices) ||
-      historyData.prices.length === 0
-    ) {
-      console.error("No chart data available.");
-      destroyChart();
-      return;
-    }
 
-    destroyChart();
+const canvas =
+document.getElementById(canvasId);
 
-    const labels = historyData.prices.map(([time]) =>
-      new Date(time).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      })
-    );
 
-    const prices = historyData.prices.map(([, price]) => price);
 
-    const dark = isDarkMode();
+if(!canvas){
 
-    chartInstance = new Chart(ctx, {
-      type: "line",
+console.error(
+"Chart canvas not found"
+);
 
-      data: {
-        labels,
+return;
 
-        datasets: [
-          {
-            label: "Price (USD)",
-
-            data: prices,
-
-            borderColor: "#3b82f6",
-
-            backgroundColor: "rgba(59,130,246,.15)",
-
-            fill: true,
-
-            borderWidth: 3,
-
-            tension: 0.4,
-
-            pointRadius: 3,
-
-            pointHoverRadius: 6,
-
-            pointBackgroundColor: "#3b82f6",
-          },
-        ],
-      },
-
-      options: {
-        responsive: true,
-
-        maintainAspectRatio: false,
-
-        animation: {
-          duration: 600,
-        },
-
-        interaction: {
-          intersect: false,
-          mode: "index",
-        },
-
-        plugins: {
-          legend: {
-            display: true,
-            labels: {
-              color: dark ? "#ffffff" : "#222222",
-            },
-          },
-
-          tooltip: {
-            callbacks: {
-              label(context) {
-                return `$${Number(context.raw).toLocaleString()}`;
-              },
-            },
-          },
-        },
-
-        scales: {
-          x: {
-            ticks: {
-              color: dark ? "#ffffff" : "#555555",
-            },
-
-            grid: {
-              color: dark
-                ? "rgba(255,255,255,.08)"
-                : "rgba(0,0,0,.08)",
-            },
-          },
-
-          y: {
-            ticks: {
-              color: dark ? "#ffffff" : "#555555",
-
-              callback(value) {
-                return "$" + Number(value).toLocaleString();
-              },
-            },
-
-            grid: {
-              color: dark
-                ? "rgba(255,255,255,.08)"
-                : "rgba(0,0,0,.08)",
-            },
-          },
-        },
-      },
-    });
-  } catch (error) {
-    console.error("Chart Error:", error);
-  }
 }
+
+
+
+const ctx =
+canvas.getContext("2d");
+
+
+
+if(!ctx){
+
+console.error(
+"Canvas unavailable"
+);
+
+return;
+
+}
+
+
+
+if(
+!historyData ||
+!Array.isArray(historyData.prices) ||
+historyData.prices.length===0
+){
+
+console.error(
+"No chart data"
+);
+
+destroyChart();
+
+return;
+
+}
+
+
+
+destroyChart();
+
+
+
+
+const labels =
+historyData.prices.map(
+([time])=>
+
+new Date(time)
+.toLocaleDateString(
+"en-US",
+{
+month:"short",
+day:"numeric"
+}
+
+)
+
+);
+
+
+
+
+const prices =
+historyData.prices.map(
+([,price])=>price
+);
+
+
+
+
+const dark =
+isDarkMode();
+
+
+
+
+
+chartInstance =
+new Chart(
+ctx,
+{
+
+
+type:"line",
+
+
+
+data:{
+
+
+labels,
+
+
+
+datasets:[
+
+{
+
+
+label:"Price USD",
+
+
+data:prices,
+
+
+borderColor:
+"#2563eb",
+
+
+
+backgroundColor:
+"rgba(37,99,235,0.15)",
+
+
+
+fill:true,
+
+
+
+borderWidth:3,
+
+
+
+tension:0.4,
+
+
+
+pointRadius:2,
+
+
+
+pointHoverRadius:6
+
+
+
+}
+
+
+]
+
+
+},
+
+
+
+
+options:{
+
+
+responsive:true,
+
+
+maintainAspectRatio:false,
+
+
+
+interaction:{
+
+
+mode:"index",
+
+intersect:false
+
+
+},
+
+
+
+
+plugins:{
+
+
+
+legend:{
+
+
+display:true,
+
+
+labels:{
+
+
+color:
+dark
+?
+"#e2e8f0"
+:
+"#334155"
+
+
+}
+
+
+},
+
+
+
+
+tooltip:{
+
+
+callbacks:{
+
+
+label(context){
+
+
+return (
+
+"$" +
+
+Number(
+context.raw
+)
+.toLocaleString()
+
+);
+
+
+}
+
+
+}
+
+
+}
+
+
+},
+
+
+
+
+
+
+scales:{
+
+
+
+x:{
+
+
+ticks:{
+
+
+color:
+dark
+?
+"#cbd5e1"
+:
+"#64748b",
+
+
+
+maxTicksLimit:7
+
+
+},
+
+
+
+grid:{
+
+
+display:false
+
+
+}
+
+
+},
+
+
+
+
+
+y:{
+
+
+ticks:{
+
+
+color:
+dark
+?
+"#cbd5e1"
+:
+"#64748b",
+
+
+
+callback(value){
+
+
+return (
+
+"$"+
+
+Number(value)
+.toLocaleString()
+
+);
+
+
+}
+
+
+},
+
+
+
+grid:{
+
+
+color:
+dark
+?
+"rgba(255,255,255,.08)"
+:
+"rgba(0,0,0,.08)"
+
+
+}
+
+
+
+}
+
+
+}
+
+
+
+}
+
+
+
+
+}
+
+
+);
+
+
+
+}
+
+catch(error){
+
+
+console.error(
+"Chart Error:",
+error
+);
+
+
+}
+
+
+}
+
+
+
+
+
+
 
 /*
 ================================
-UPDATE CHART
+UPDATE
 ================================
 */
 
-export function updateChart(canvasId, historyData) {
-  createChart(canvasId, historyData);
+
+export function updateChart(
+canvasId,
+historyData
+){
+
+createChart(
+canvasId,
+historyData
+);
+
+
 }
+
+
+
+
+
+
 
 /*
 ================================
-DESTROY CHART
+DESTROY
 ================================
 */
 
-export function destroyChart() {
-  if (chartInstance) {
-    chartInstance.destroy();
-    chartInstance = null;
-  }
+
+export function destroyChart(){
+
+
+if(chartInstance){
+
+
+chartInstance.destroy();
+
+
+chartInstance=null;
+
+
+}
+
+
 }

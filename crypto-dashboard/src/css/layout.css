@@ -1,175 +1,86 @@
-/* ==========================
-   MAIN LAYOUT
-========================== */
+.container,
+.dashboard-container{
 
-
-main{
-
-    min-height:80vh;
-
-}
-
-
-
-
-.container{
-
-    width:90%;
+    width:92%;
 
     max-width:1400px;
 
-    margin:auto;
+    margin:0 auto;
 
 }
 
+main{
 
+ min-height:85vh;
 
+}
 
-
-
-/* ==========================
-   HEADER
-========================== */
 
 
 header{
 
-    width:100%;
+ display:flex;
 
-    padding:18px 5%;
+ justify-content:space-between;
 
-    display:flex;
+ align-items:center;
 
-    justify-content:space-between;
+ padding:20px 5%;
 
-    align-items:center;
+ background:white;
 
+ position:sticky;
 
-    background:white;
+ top:0;
 
+ z-index:100;
 
-    box-shadow:
-
-    0 5px 20px rgba(0,0,0,.06);
-
-
-    position:sticky;
-
-    top:0;
-
-    z-index:100;
+ box-shadow:
+ 0 5px 20px rgba(0,0,0,.05);
 
 }
-
-
 
 
 .logo{
 
-    font-size:24px;
+ font-size:26px;
 
-    font-weight:800;
+ font-weight:800;
 
 }
-
-
 
 
 
 nav{
 
-    display:flex;
+ display:flex;
 
-    gap:25px;
-
-    align-items:center;
+ gap:25px;
 
 }
-
-
 
 
 
 nav a{
 
-    font-weight:600;
+ color:#475569;
 
-    color:#475569;
-
-}
-
-
-
-
-
-nav a:hover{
-
-    color:#2563eb;
+ font-weight:600;
 
 }
 
-
-
-
-
-
-
-/* ==========================
-   FOOTER
-========================== */
 
 
 footer{
 
-    margin-top:50px;
+ margin-top:60px;
 
-    padding:25px 5%;
+ padding:30px;
 
+ text-align:center;
 
-    text-align:center;
+ background:white;
 
-
-    background:white;
-
-
-    color:#64748b;
-
-
-    border-top:
-
-    1px solid #e2e8f0;
-
-}
-
-
-
-
-
-/* ==========================
-   DARK MODE LAYOUT
-========================== */
-
-
-body.dark header{
-
-    background:#0f172a;
-
-}
-
-
-
-body.dark footer{
-
-    background:#0f172a;
-
-    border-color:#334155;
-
-}
-
-
-
-body.dark nav a{
-
-    color:#cbd5e1;
+ color:#64748b;
 
 }
