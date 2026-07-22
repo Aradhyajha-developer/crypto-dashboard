@@ -127,7 +127,7 @@ function setupSearch() {
 }
 
 /* ==========================================
-   SEARCH SUGGESTIONS
+   SEARCH SUGGESTIONS - FIXED ✅
 ========================================== */
 
 async function showSuggestions(query) {
@@ -141,7 +141,7 @@ async function showSuggestions(query) {
     if (!data?.coins?.length) {
 
       suggestions.innerHTML = `
-        <div class="suggestion-item">
+        <div class="suggestion-item no-results">
           No results found
         </div>
       `;
@@ -157,25 +157,30 @@ async function showSuggestions(query) {
 
         item.className = "suggestion-item";
 
+        // FIX: Use thumb properly with fallback
+        const imageUrl = coin.thumb || coin.large || "https://via.placeholder.com/24";
+
         item.innerHTML = `
           <img
-            src="${coin.thumb}"
+            src="${imageUrl}"
             alt="${coin.name}"
             width="24"
             height="24"
             loading="lazy"
+            onerror="this.src='https://via.placeholder.com/24'"
           />
 
-          <div>
+          <div class="suggestion-content">
 
             <strong>${coin.name}</strong>
 
-            <small>
-              ${coin.symbol.toUpperCase()}
-            </small>
+            <small>${coin.symbol.toUpperCase()}</small>
 
           </div>
         `;
+
+        item.style.cursor = "pointer";
+        item.style.padding = "10px";
 
         item.addEventListener("click", () => {
 
@@ -187,6 +192,14 @@ async function showSuggestions(query) {
 
         });
 
+        item.addEventListener("mouseover", () => {
+          item.style.backgroundColor = "#f0f0f0";
+        });
+
+        item.addEventListener("mouseout", () => {
+          item.style.backgroundColor = "transparent";
+        });
+
         suggestions.appendChild(item);
 
       });
@@ -195,13 +208,18 @@ async function showSuggestions(query) {
 
   catch (error) {
 
-    console.error(error);
+    console.error("Search Error:", error);
 
-    suggestions.innerHTML = "";
+    suggestions.innerHTML = `
+      <div class="suggestion-item no-results">
+        ⚠️ Search error. Try again.
+      </div>
+    `;
 
   }
 
 }
+
 /* ==========================================
    LOAD COIN
 ========================================== */
@@ -236,7 +254,7 @@ async function loadCoin(id) {
 
     showError(
       results,
-      "Unable to load coin data."
+      "Unable to load coin data. Please try again."
     );
 
     destroyChart();
@@ -250,7 +268,7 @@ async function loadCoin(id) {
 }
 
 /* ==========================================
-   RENDER COIN
+   RENDER COIN - FIXED ✅
 ========================================== */
 
 function renderCoin(coin) {
@@ -261,6 +279,9 @@ function renderCoin(coin) {
 
   const isFav = isFavorite(coin.id);
 
+  // Image fallback
+  const coinImage = coin.image.large || "https://via.placeholder.com/80";
+
   results.innerHTML = `
 
 <div class="coin-card">
@@ -268,11 +289,12 @@ function renderCoin(coin) {
   <div class="coin-header">
 
     <img
-      src="${coin.image.large}"
+      src="${coinImage}"
       alt="${coin.name}"
       width="80"
       height="80"
       loading="lazy"
+      onerror="this.src='https://via.placeholder.com/80'"
     />
 
     <div>
@@ -463,8 +485,9 @@ async function loadChart(id) {
   }
 
 }
+
 /* ==========================================
-   FAVORITES
+   FAVORITES - FIXED ✅
 ========================================== */
 
 async function renderFavorites() {
@@ -498,6 +521,9 @@ async function renderFavorites() {
 
       li.className = "favorite-item";
 
+      // Image fallback
+      const smallImage = coin.image.small || "https://via.placeholder.com/28";
+
       li.innerHTML = `
 
 <div class="favorite-row">
@@ -505,17 +531,16 @@ async function renderFavorites() {
 <div class="favorite-info">
 
 <img
-src="${coin.image.small}"
+src="${smallImage}"
 alt="${coin.name}"
 width="28"
 height="28"
 loading="lazy"
+onerror="this.src='https://via.placeholder.com/28'"
 />
 
 <span>
-
 ${coin.name}
-
 </span>
 
 </div>
@@ -542,6 +567,8 @@ title="Remove Favorite"
 
 `;
 
+      li.style.cursor = "pointer";
+
       favList.appendChild(li);
 
     });
@@ -550,7 +577,7 @@ title="Remove Favorite"
 
   catch (error) {
 
-    console.error(error);
+    console.error("Favorites Error:", error);
 
     showError(
       favList,

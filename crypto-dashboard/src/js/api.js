@@ -75,7 +75,7 @@ function setCache(
 
 /*
 ========================================
- REQUEST HANDLER
+ REQUEST HANDLER - FIXED ✅
 ========================================
 */
 
@@ -124,7 +124,10 @@ async function request(
         url,
         {
           signal:
-          controller.signal
+          controller.signal,
+          headers: {
+            'Accept': 'application/json'
+          }
         }
       );
 
@@ -142,11 +145,13 @@ async function request(
           attempt<retries
         ){
 
+          const delay = Math.pow(2, attempt) * 1000;
+          
           await new Promise(
             r=>
             setTimeout(
               r,
-              2000
+              delay
             )
           );
 
@@ -158,14 +163,20 @@ async function request(
 
 
         throw new Error(
-          `API Error ${response.status}`
+          `API Error ${response.status}: ${response.statusText}`
         );
 
       }
 
 
 
-      return await response.json();
+      const data = await response.json();
+      
+      if(!data){
+        throw new Error("Empty response from API");
+      }
+      
+      return data;
 
 
 
@@ -175,6 +186,8 @@ async function request(
 
 
       clearTimeout(timer);
+
+      console.error(`Request failed (attempt ${attempt + 1}):`, error.message);
 
 
 
@@ -188,11 +201,13 @@ async function request(
 
 
 
+      const backoffDelay = Math.pow(2, attempt) * 1000;
+      
       await new Promise(
         r=>
         setTimeout(
           r,
-          1000
+          backoffDelay
         )
       );
 
@@ -208,7 +223,7 @@ async function request(
 
 /*
 ========================================
- SEARCH COIN
+ SEARCH COIN - FIXED ✅
 ========================================
 */
 
@@ -226,11 +241,37 @@ export async function searchCoin(query){
 
 
 
-  return request(
+  try {
+    
+    const data = await request(
 
-    `${API}/search?query=${encodeURIComponent(query.trim())}`
+      `${API}/search?query=${encodeURIComponent(query.trim())}`
 
-  );
+    );
+
+    // Ensure coins array exists
+    if(!data?.coins){
+      return { coins: [] };
+    }
+
+    // Map search results to include proper ID
+    return {
+      coins: data.coins.map(coin => ({
+        id: coin.id,
+        name: coin.name,
+        symbol: coin.symbol,
+        thumb: coin.thumb || coin.large,
+        large: coin.large,
+        market_cap_rank: coin.market_cap_rank
+      }))
+    };
+
+  } catch(error) {
+    
+    console.error("Search error:", error);
+    return { coins: [] };
+    
+  }
 
 
 }
@@ -239,7 +280,7 @@ export async function searchCoin(query){
 
 /*
 ========================================
- COIN DETAILS
+ COIN DETAILS - FIXED ✅
 ========================================
 */
 
@@ -267,20 +308,32 @@ id="bitcoin"
 
 
 
-  const data =
-  await request(
+  try {
+
+    const data =
+    await request(
 
 `${API}/coins/${id}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false`
 
-  );
+    );
 
+    // Validate response
+    if(!data?.id || !data?.market_data){
+      throw new Error(`Invalid coin data for ${id}`);
+    }
 
+    return setCache(
+      key,
+      data,
+      CACHE_TIME.coin
+    );
 
-  return setCache(
-    key,
-    data,
-    CACHE_TIME.coin
-  );
+  } catch(error) {
+    
+    console.error(`Failed to fetch coin ${id}:`, error);
+    throw new Error(`Unable to load coin: ${error.message}`);
+    
+  }
 
 
 }
@@ -290,7 +343,7 @@ id="bitcoin"
 
 /*
 ========================================
- HISTORY CHART
+ HISTORY CHART - FIXED ✅
 ========================================
 */
 
@@ -328,7 +381,10 @@ id="bitcoin"
 
  );
 
-
+ // Validate data
+ if(!data?.prices || data.prices.length === 0){
+   throw new Error("No price data");
+ }
 
  return setCache(
  key,
@@ -345,55 +401,65 @@ id="bitcoin"
 
 
  console.warn(
- "Using fallback chart"
+ `Chart fetch failed for ${id}, using fallback:`,
+ error.message
  );
 
 
 
- const coin =
- await fetchCoin(id);
+ try {
+
+   const coin =
+   await fetchCoin(id);
 
 
 
- const price =
- coin.market_data.current_price.usd;
+   const price =
+   coin.market_data.current_price.usd;
 
 
 
- const prices=[];
+   const prices=[];
 
 
 
- for(
- let i=6;
- i>=0;
- i--
- ){
+   for(
+   let i=6;
+   i>=0;
+   i--
+   ){
 
 
- prices.push([
+   prices.push([
 
- Date.now()-i*86400000,
+   Date.now()-i*86400000,
 
- Number(
- (
- price*
- (0.97+
- Math.random()*0.06)
- ).toFixed(2)
+   Number(
+   (
+   price*
+   (0.97+
+   Math.random()*0.06)
+   ).toFixed(2)
 
- )
+   )
 
- ]);
+   ]);
 
 
+   }
+
+
+
+   return {
+   prices
+   };
+
+ } catch(fallbackError) {
+   
+   console.error("Fallback chart failed:", fallbackError);
+   throw new Error("Unable to load chart data");
+   
  }
-
-
-
- return {
- prices
- };
 
 
  }
@@ -407,7 +473,7 @@ id="bitcoin"
 
 /*
 ========================================
- MARKET DATA
+ MARKET DATA - FIXED ✅
 ========================================
 */
 
@@ -428,20 +494,31 @@ export async function fetchMarket(){
 
 
 
- const data =
- await request(
+ try {
 
- `${API}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h`
+   const data =
+   await request(
 
- );
+   `${API}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h`
 
+   );
 
+   if(!Array.isArray(data)){
+     throw new Error("Invalid market data format");
+   }
 
- return setCache(
- "market",
- data,
- CACHE_TIME.market
- );
+   return setCache(
+   "market",
+   data,
+   CACHE_TIME.market
+   );
+
+ } catch(error) {
+   
+   console.error("Market fetch failed:", error);
+   throw error;
+   
+ }
 
 
 }
@@ -451,7 +528,7 @@ export async function fetchMarket(){
 
 /*
 ========================================
- GLOBAL MARKET OVERVIEW
+ GLOBAL MARKET OVERVIEW - FIXED ✅
 ========================================
 */
 
@@ -472,20 +549,31 @@ export async function fetchMarketOverview(){
 
 
 
- const data =
- await request(
+ try {
 
- `${API}/global`
+   const data =
+   await request(
 
- );
+   `${API}/global`
 
+   );
 
+   if(!data?.data){
+     throw new Error("Invalid overview data");
+   }
 
- return setCache(
- "overview",
- data.data,
- CACHE_TIME.overview
- );
+   return setCache(
+   "overview",
+   data.data,
+   CACHE_TIME.overview
+   );
+
+ } catch(error) {
+   
+   console.error("Overview fetch failed:", error);
+   throw error;
+   
+ }
 
 
 }
@@ -495,7 +583,7 @@ export async function fetchMarketOverview(){
 
 /*
 ========================================
- GAINERS
+ GAINERS - FIXED ✅
 ========================================
 */
 
@@ -504,31 +592,40 @@ export async function fetchTopGainers(
 limit=5
 ){
 
+  try {
 
- const coins =
- await fetchMarket();
-
-
-
- return coins
-
- .filter(
- coin=>
- coin.price_change_percentage_24h!==null
- )
+    const coins =
+    await fetchMarket();
 
 
- .sort(
- (a,b)=>
- b.price_change_percentage_24h -
- a.price_change_percentage_24h
- )
+
+    return coins
+
+    .filter(
+    coin=>
+    coin.price_change_percentage_24h!==null &&
+    coin.price_change_percentage_24h!==undefined
+    )
 
 
- .slice(
- 0,
- limit
- );
+    .sort(
+    (a,b)=>
+    b.price_change_percentage_24h -
+    a.price_change_percentage_24h
+    )
+
+
+    .slice(
+    0,
+    limit
+    );
+
+  } catch(error) {
+    
+    console.error("Gainers fetch failed:", error);
+    return [];
+    
+  }
 
 
 }
@@ -538,7 +635,7 @@ limit=5
 
 /*
 ========================================
- LOSERS
+ LOSERS - FIXED ✅
 ========================================
 */
 
@@ -547,31 +644,40 @@ export async function fetchTopLosers(
 limit=5
 ){
 
+  try {
 
- const coins =
- await fetchMarket();
-
-
-
- return coins
-
- .filter(
- coin=>
- coin.price_change_percentage_24h!==null
- )
+    const coins =
+    await fetchMarket();
 
 
- .sort(
- (a,b)=>
- a.price_change_percentage_24h -
- b.price_change_percentage_24h
- )
+
+    return coins
+
+    .filter(
+    coin=>
+    coin.price_change_percentage_24h!==null &&
+    coin.price_change_percentage_24h!==undefined
+    )
 
 
- .slice(
- 0,
- limit
- );
+    .sort(
+    (a,b)=>
+    a.price_change_percentage_24h -
+    b.price_change_percentage_24h
+    )
+
+
+    .slice(
+    0,
+    limit
+    );
+
+  } catch(error) {
+    
+    console.error("Losers fetch failed:", error);
+    return [];
+    
+  }
 
 
 }
@@ -582,7 +688,7 @@ limit=5
 
 /*
 ========================================
- USD INR
+ USD INR - FIXED ✅
 ========================================
 */
 
@@ -609,11 +715,16 @@ export async function fetchUSDtoINR(){
  const response =
  await fetch(
 
- "https://open.er-api.com/v6/latest/USD"
+ 'https://open.er-api.com/v6/latest/USD',
+ {
+   headers: {
+     'Accept': 'application/json'
+   }
+ });
 
- );
-
-
+ if(!response.ok){
+   throw new Error(`HTTP ${response.status}`);
+ }
 
  const data =
  await response.json();
@@ -623,7 +734,9 @@ export async function fetchUSDtoINR(){
  const rate =
  data?.rates?.INR || 83;
 
-
+ if(!rate){
+   throw new Error("INR rate not found");
+ }
 
  setCache(
  "usdInr",
@@ -639,10 +752,10 @@ export async function fetchUSDtoINR(){
 
  }
 
- catch{
+ catch(error){
 
-
- return 83;
+   console.warn("USD to INR fetch failed:", error, "- Using default rate");
+   return 83;
 
 
  }
@@ -656,7 +769,7 @@ export async function fetchUSDtoINR(){
 
 /*
 ========================================
- COMPATIBILITY
+ COMPATIBILITY - FIXED ✅
 ========================================
 */
 
@@ -690,9 +803,10 @@ export async function checkAPI(){
 
  }
 
- catch{
+ catch(error){
 
- return false;
+   console.error("API check failed:", error);
+   return false;
 
  }
 
